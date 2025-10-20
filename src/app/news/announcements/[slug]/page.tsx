@@ -14,10 +14,18 @@ interface AnnouncementPageProps {
 }
 
 export async function generateStaticParams() {
-  const announcements = await getAnnouncements()
-  return announcements.map((announcement: any) => ({
-    slug: announcement.slug.current,
-  }))
+  try {
+    const announcements = await getAnnouncements()
+    if (!announcements || announcements.length === 0) {
+      return []
+    }
+    return announcements.map((announcement: any) => ({
+      slug: announcement.slug?.current || announcement.slug,
+    })).filter(param => param.slug) // Filter out any invalid slugs
+  } catch (error) {
+    console.warn('Failed to generate static params for announcements:', error)
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: AnnouncementPageProps) {

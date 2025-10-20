@@ -1,5 +1,11 @@
 import { sanityClient } from './sanity'
 
+// Check if Sanity is properly configured
+const isSanityConfigured = () => {
+  return process.env.NEXT_PUBLIC_SANITY_PROJECT_ID && 
+         process.env.NEXT_PUBLIC_SANITY_PROJECT_ID !== 'dummy-project-id'
+}
+
 // GROQ queries for different content types
 export const ARTICLE_QUERY = `*[_type == "article" && isPublished == true] | order(publishedAt desc) {
   _id,
@@ -129,75 +135,135 @@ export const NAVIGATION_PAGES_QUERY = `*[_type == "page" && isPublished == true 
 
 // Fetch functions with ISR caching
 export async function getArticles() {
-  return await sanityClient.fetch(ARTICLE_QUERY, {}, {
-    next: { 
-      revalidate: 60, // Revalidate every 60 seconds
-      tags: ['articles'] 
-    }
-  })
+  if (!isSanityConfigured()) {
+    console.warn('Sanity not configured, returning empty articles array')
+    return []
+  }
+  
+  try {
+    return await sanityClient.fetch(ARTICLE_QUERY, {}, {
+      next: { 
+        revalidate: 60, // Revalidate every 60 seconds
+        tags: ['articles'] 
+      }
+    })
+  } catch (error) {
+    console.warn('Failed to fetch articles from Sanity, returning empty array:', error)
+    return []
+  }
 }
 
 export async function getArticleBySlug(slug: string) {
-  return await sanityClient.fetch(ARTICLE_BY_SLUG_QUERY, { slug }, {
-    next: { 
-      revalidate: 3600, // Revalidate every hour for individual articles
-      tags: ['articles', `article-${slug}`] 
-    }
-  })
+  if (!isSanityConfigured()) {
+    console.warn('Sanity not configured, returning null for article')
+    return null
+  }
+  
+  try {
+    return await sanityClient.fetch(ARTICLE_BY_SLUG_QUERY, { slug }, {
+      next: { 
+        revalidate: 3600, // Revalidate every hour for individual articles
+        tags: ['articles', `article-${slug}`] 
+      }
+    })
+  } catch (error) {
+    console.warn(`Failed to fetch article with slug ${slug} from Sanity:`, error)
+    return null
+  }
 }
 
 export async function getAnnouncements() {
-  return await sanityClient.fetch(ANNOUNCEMENT_QUERY, {}, {
-    next: { 
-      revalidate: 30, // Revalidate every 30 seconds for announcements (more urgent)
-      tags: ['announcements'] 
-    }
-  })
+  if (!isSanityConfigured()) {
+    console.warn('Sanity not configured, returning empty announcements array')
+    return []
+  }
+  
+  try {
+    return await sanityClient.fetch(ANNOUNCEMENT_QUERY, {}, {
+      next: { 
+        revalidate: 30, // Revalidate every 30 seconds for announcements (more urgent)
+        tags: ['announcements'] 
+      }
+    })
+  } catch (error) {
+    console.warn('Failed to fetch announcements from Sanity, returning empty array:', error)
+    return []
+  }
 }
 
 export async function getAnnouncementBySlug(slug: string) {
-  return await sanityClient.fetch(ANNOUNCEMENT_BY_SLUG_QUERY, { slug }, {
-    next: { 
-      revalidate: 300, // Revalidate every 5 minutes for individual announcements
-      tags: ['announcements', `announcement-${slug}`] 
-    }
-  })
+  if (!isSanityConfigured()) {
+    console.warn('Sanity not configured, returning null for announcement')
+    return null
+  }
+  
+  try {
+    return await sanityClient.fetch(ANNOUNCEMENT_BY_SLUG_QUERY, { slug }, {
+      next: { 
+        revalidate: 300, // Revalidate every 5 minutes for individual announcements
+        tags: ['announcements', `announcement-${slug}`] 
+      }
+    })
+  } catch (error) {
+    console.warn(`Failed to fetch announcement with slug ${slug} from Sanity:`, error)
+    return null
+  }
 }
 
 export async function getEvents() {
-  return await sanityClient.fetch(EVENT_QUERY, {}, {
-    next: { 
-      revalidate: 300, // Revalidate every 5 minutes
-      tags: ['events'] 
-    }
-  })
+  try {
+    return await sanityClient.fetch(EVENT_QUERY, {}, {
+      next: { 
+        revalidate: 300, // Revalidate every 5 minutes
+        tags: ['events'] 
+      }
+    })
+  } catch (error) {
+    console.warn('Failed to fetch events from Sanity, returning empty array:', error)
+    return []
+  }
 }
 
 export async function getEventBySlug(slug: string) {
-  return await sanityClient.fetch(EVENT_BY_SLUG_QUERY, { slug }, {
-    next: { 
-      revalidate: 3600, // Revalidate every hour for individual events
-      tags: ['events', `event-${slug}`] 
-    }
-  })
+  try {
+    return await sanityClient.fetch(EVENT_BY_SLUG_QUERY, { slug }, {
+      next: { 
+        revalidate: 3600, // Revalidate every hour for individual events
+        tags: ['events', `event-${slug}`] 
+      }
+    })
+  } catch (error) {
+    console.warn(`Failed to fetch event with slug ${slug} from Sanity:`, error)
+    return null
+  }
 }
 
 export async function getPageBySlug(slug: string) {
-  return await sanityClient.fetch(PAGE_BY_SLUG_QUERY, { slug }, {
-    next: { 
-      revalidate: 3600, // Revalidate every hour for pages
-      tags: ['pages', `page-${slug}`] 
-    }
-  })
+  try {
+    return await sanityClient.fetch(PAGE_BY_SLUG_QUERY, { slug }, {
+      next: { 
+        revalidate: 3600, // Revalidate every hour for pages
+        tags: ['pages', `page-${slug}`] 
+      }
+    })
+  } catch (error) {
+    console.warn(`Failed to fetch page with slug ${slug} from Sanity:`, error)
+    return null
+  }
 }
 
 export async function getNavigationPages() {
-  return await sanityClient.fetch(NAVIGATION_PAGES_QUERY, {}, {
-    next: { 
-      revalidate: 1800, // Revalidate every 30 minutes
-      tags: ['pages', 'navigation'] 
-    }
-  })
+  try {
+    return await sanityClient.fetch(NAVIGATION_PAGES_QUERY, {}, {
+      next: { 
+        revalidate: 1800, // Revalidate every 30 minutes
+        tags: ['pages', 'navigation'] 
+      }
+    })
+  } catch (error) {
+    console.warn('Failed to fetch navigation pages from Sanity, returning empty array:', error)
+    return []
+  }
 }
 
 // Search function
@@ -221,5 +287,10 @@ export async function searchContent(query: string) {
     _updatedAt
   }`
   
-  return await sanityClient.fetch(searchQuery, { searchTerm: `${query}*` })
+  try {
+    return await sanityClient.fetch(searchQuery, { searchTerm: `${query}*` })
+  } catch (error) {
+    console.warn(`Failed to search content for query "${query}" from Sanity:`, error)
+    return []
+  }
 }

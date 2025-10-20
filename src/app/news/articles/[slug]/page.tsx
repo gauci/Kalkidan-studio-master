@@ -15,10 +15,18 @@ interface ArticlePageProps {
 }
 
 export async function generateStaticParams() {
-  const articles = await getArticles()
-  return articles.map((article: any) => ({
-    slug: article.slug.current,
-  }))
+  try {
+    const articles = await getArticles()
+    if (!articles || articles.length === 0) {
+      return []
+    }
+    return articles.map((article: any) => ({
+      slug: article.slug?.current || article.slug,
+    })).filter(param => param.slug) // Filter out any invalid slugs
+  } catch (error) {
+    console.warn('Failed to generate static params for articles:', error)
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: ArticlePageProps) {
