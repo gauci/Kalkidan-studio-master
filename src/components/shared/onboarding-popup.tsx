@@ -1,75 +1,60 @@
+'use client';
 
-"use client";
+import { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { CheckCircle } from 'lucide-react';
 
-import { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { HandHelping, Megaphone, Download, UserCircle } from "lucide-react";
-
-const OnboardingPopup = () => {
+export function OnboardingPopup() {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(true);
 
   useEffect(() => {
-    const hasVisited = localStorage.getItem("hasVisitedKalkidanHub");
-    if (!hasVisited) {
-      setIsOpen(true);
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const seen = localStorage.getItem('hasSeenOnboarding');
+      if (!seen) {
+        setHasSeenOnboarding(false);
+        setIsOpen(true);
+      }
     }
   }, []);
 
-  const handleDismiss = () => {
-    localStorage.setItem("hasVisitedKalkidanHub", "true");
+  const handleClose = () => {
     setIsOpen(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hasSeenOnboarding', 'true');
+    }
   };
 
+  if (hasSeenOnboarding) {
+    return null;
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleDismiss}>
-      <DialogContent className="bg-background border-primary">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-headline text-destructive">
-            <HandHelping className="h-6 w-6" /> Welcome to Kalkidan e.V. Community Hub!
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            Welcome to Kalkidan Community Hub!
           </DialogTitle>
-          <DialogDescription className="pt-2">
-            Here is a quick guide to get you started.
-          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="flex items-start gap-4">
-            <UserCircle className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-            <div>
-              <h4 className="font-semibold">Login or Register</h4>
-              <p className="text-sm text-muted-foreground">Access member-only features by logging in or registering a new account.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <Megaphone className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-            <div>
-              <h4 className="font-semibold">Find Announcements</h4>
-              <p className="text-sm text-muted-foreground">Stay up-to-date with the latest community news and events.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <Download className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-            <div>
-              <h4 className="font-semibold">Download Forms</h4>
-              <p className="text-sm text-muted-foreground">Easily access important documents like membership applications.</p>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={handleDismiss} className="bg-accent text-accent-foreground hover:bg-accent/90">
-            Got it, thanks!
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Your community platform is now ready with enhanced features:
+          </p>
+          <ul className="text-sm space-y-2">
+            <li>• User authentication and file management</li>
+            <li>• Admin content management system</li>
+            <li>• News and announcements</li>
+            <li>• Secure file sharing</li>
+          </ul>
+          <Button onClick={handleClose} className="w-full">
+            Get Started
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
-};
-
-export { OnboardingPopup };
+}

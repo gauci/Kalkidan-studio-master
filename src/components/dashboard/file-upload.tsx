@@ -93,7 +93,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       ));
 
       // Create file record in database
-      const sessionToken = localStorage.getItem('sessionToken');
+      const sessionToken = typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null;
       if (!sessionToken) {
         throw new Error('No session token');
       }

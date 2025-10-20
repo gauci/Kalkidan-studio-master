@@ -94,16 +94,49 @@ const nextConfig: NextConfig = {
   },
 
   // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { dev, isServer, webpack }) => {
+    // Fix for "self is not defined" error in Vercel builds
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        util: false,
+        buffer: false,
+        events: false,
+      };
+      
+      // Add global polyfill for self using webpack's DefinePlugin
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new webpack.DefinePlugin({
+          'typeof self': JSON.stringify('object'),
+          'global.self': 'globalThis',
+        })
+      );
+    }
+
     // Production optimizations
     if (!dev) {
       config.optimization.splitChunks = {
         chunks: 'all',
+        maxSize: 244000,
         cacheGroups: {
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
+            priority: -10,
             chunks: 'all',
+            enforce: true,
+            maxSize: 244000,
           },
         },
       };
@@ -112,10 +145,19 @@ const nextConfig: NextConfig = {
     return config;
   },
 
+  // External packages for server components
+  serverExternalPackages: ['convex'],
+
   // Experimental features
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+
+  // Environment variables validation
+  env: {
+    NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
+    NEXT_PUBLIC_SANITY_PROJECT_ID: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+    NEXT_PUBLIC_SANITY_DATASET: process.env.NEXT_PUBLIC_SANITY_DATASET,
   },
 };
 

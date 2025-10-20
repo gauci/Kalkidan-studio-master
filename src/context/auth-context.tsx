@@ -38,21 +38,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loginMutation = useMutation(api.auth.loginUser);
-  const registerMutation = useMutation(api.auth.registerUser);
-  const logoutMutation = useMutation(api.auth.logoutUser);
+  // Only use Convex hooks on client side
+  const loginMutation = typeof window !== 'undefined' ? useMutation(api.auth.loginUser) : null;
+  const registerMutation = typeof window !== 'undefined' ? useMutation(api.auth.registerUser) : null;
+  const logoutMutation = typeof window !== 'undefined' ? useMutation(api.auth.logoutUser) : null;
   
-  // Verify session on mount
-  const currentUser = useQuery(
-    api.auth.getCurrentUser,
-    sessionToken ? { token: sessionToken } : 'skip'
-  );
+  // Verify session on mount (only on client side)
+  const currentUser = typeof window !== 'undefined' && sessionToken 
+    ? useQuery(api.auth.getCurrentUser, { token: sessionToken })
+    : undefined;
 
   useEffect(() => {
-    // Check for existing session token
-    const token = localStorage.getItem('sessionToken');
-    if (token) {
-      setSessionToken(token);
+    // Check for existing session token (only on client side)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('sessionToken');
+      if (token) {
+        setSessionToken(token);
+      } else {
+        setIsLoading(false);
+      }
     } else {
       setIsLoading(false);
     }
@@ -66,11 +70,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   const login = async (email: string, password: string) => {
+    if (!loginMutation) {
+      throw new Error('Login not available on server side');
+    }
     try {
       const result = await loginMutation({ email, password });
       setSessionToken(result.sessionToken);
       setUser(result.user);
-      localStorage.setItem('sessionToken', result.sessionToken);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sessionToken', result.sessionToken);
+      }
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -78,6 +87,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
+    if (!registerMutation) {
+      throw new Error('Registration not available on server side');
+    }
     try {
       const result = await registerMutation(data);
       return result;
@@ -88,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    if (sessionToken) {
+    if (sessionToken && logoutMutation) {
       try {
         await logoutMutation({ token: sessionToken });
       } catch (error) {
@@ -98,7 +110,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setUser(null);
     setSessionToken(null);
-    localStorage.removeItem('sessionToken');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('sessionToken');
+    }
   };
 
   return (

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "./providers";
+import { OnboardingPopup } from "@/components/shared/onboarding-popup";
 
 export const metadata: Metadata = {
   title: "Kalkidan Community Hub",
@@ -33,11 +34,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body
-        className="font-body antialiased"
-      >
+      <body className="font-body antialiased">
         <Providers>
           {children}
+          <OnboardingPopup />
         </Providers>
         <Toaster />
       </body>
