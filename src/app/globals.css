@@ -1,0 +1,94 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 53 91% 94%;
+    --foreground: 82 34% 18%;
+    --card: 53 91% 94%;
+    --card-foreground: 82 34% 18%;
+    --popover: 53 91% 94%;
+    --popover-foreground: 82 34% 18%;
+    --primary: 82 25% 37%;
+    --primary-foreground: 53 91% 94%;
+    --secondary: 53 30% 85%;
+    --secondary-foreground: 82 34% 18%;
+    --muted: 53 30% 90%;
+    --muted-foreground: 82 25% 45%;
+    --accent: 34 69% 62%;
+    --accent-foreground: 82 34% 18%;
+    --destructive: 28 66% 44%;
+    --destructive-foreground: 53 91% 94%;
+    --border: 82 25% 75%;
+    --input: 82 25% 75%;
+    --ring: 34 69% 62%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --sidebar-background: 82 25% 37%;
+    --sidebar-foreground: 53 91% 94%;
+    --sidebar-primary: 34 69% 62%;
+    --sidebar-primary-foreground: 82 34% 18%;
+    --sidebar-accent: 82 25% 45%;
+    --sidebar-accent-foreground: 53 91% 94%;
+    --sidebar-border: 82 25% 45%;
+    --sidebar-ring: 34 69% 62%;
+  }
+
+  .dark {
+    --background: 82 34% 10%;
+    --foreground: 53 91% 94%;
+    --card: 82 34% 10%;
+    --card-foreground: 53 91% 94%;
+    --popover: 82 34% 10%;
+    --popover-foreground: 53 91% 94%;
+    --primary: 53 91% 94%;
+    --primary-foreground: 82 34% 18%;
+    --secondary: 82 34% 15%;
+    --secondary-foreground: 53 91% 94%;
+    --muted: 82 34% 15%;
+    --muted-foreground: 53 30% 80%;
+    --accent: 34 69% 62%;
+    --accent-foreground: 82 34% 10%;
+    --destructive: 28 66% 44%;
+    --destructive-foreground: 53 91% 94%;
+    --border: 82 34% 20%;
+    --input: 82 34% 20%;
+    --ring: 34 69% 62%;
+    --sidebar-background: 82 34% 12%;
+    --sidebar-foreground: 53 91% 94%;
+    --sidebar-primary: 34 69% 62%;
+    --sidebar-primary-foreground: 82 34% 10%;
+    --sidebar-accent: 82 34% 20%;
+    --sidebar-accent-foreground: 53 91% 94%;
+    --sidebar-border: 82 34% 20%;
+    --sidebar-ring: 34 69% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline text-destructive;
+  }
+  h1 { @apply text-3xl; }
+  h2 { @apply text-2xl; }
+  h3 { @apply text-xl; }
+}
+
+@layer utilities {
+  .bg-pattern {
+    background-color: hsl(var(--background));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23606c38' fill-opacity='0.2'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+}

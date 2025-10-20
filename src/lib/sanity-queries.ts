@@ -1,0 +1,225 @@
+import { sanityClient } from './sanity'
+
+// GROQ queries for different content types
+export const ARTICLE_QUERY = `*[_type == "article" && isPublished == true] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  excerpt,
+  content,
+  featuredImage,
+  categories[]->{
+    title,
+    slug
+  },
+  publishedAt,
+  _updatedAt
+}`
+
+export const ARTICLE_BY_SLUG_QUERY = `*[_type == "article" && slug.current == $slug && isPublished == true][0] {
+  _id,
+  title,
+  slug,
+  excerpt,
+  content,
+  featuredImage,
+  categories[]->{
+    title,
+    slug
+  },
+  publishedAt,
+  _updatedAt
+}`
+
+export const ANNOUNCEMENT_QUERY = `*[_type == "announcement" && isPublished == true && (!defined(expiresAt) || expiresAt > now())] | order(isPinned desc, priority desc, publishedAt desc) {
+  _id,
+  title,
+  slug,
+  summary,
+  content,
+  priority,
+  targetAudience,
+  attachments,
+  publishedAt,
+  expiresAt,
+  isPinned,
+  _updatedAt
+}`
+
+export const ANNOUNCEMENT_BY_SLUG_QUERY = `*[_type == "announcement" && slug.current == $slug && isPublished == true][0] {
+  _id,
+  title,
+  slug,
+  summary,
+  content,
+  priority,
+  targetAudience,
+  attachments,
+  publishedAt,
+  expiresAt,
+  isPinned,
+  _updatedAt
+}`
+
+export const EVENT_QUERY = `*[_type == "event" && isPublished == true && startDate > now()] | order(startDate asc) {
+  _id,
+  title,
+  slug,
+  description,
+  content,
+  featuredImage,
+  startDate,
+  endDate,
+  location,
+  eventType,
+  registrationRequired,
+  registrationLink,
+  maxAttendees,
+  contactPerson,
+  categories[]->{
+    title,
+    slug
+  },
+  isFeatured,
+  _updatedAt
+}`
+
+export const EVENT_BY_SLUG_QUERY = `*[_type == "event" && slug.current == $slug && isPublished == true][0] {
+  _id,
+  title,
+  slug,
+  description,
+  content,
+  featuredImage,
+  startDate,
+  endDate,
+  location,
+  eventType,
+  registrationRequired,
+  registrationLink,
+  maxAttendees,
+  contactPerson,
+  categories[]->{
+    title,
+    slug
+  },
+  isFeatured,
+  _updatedAt
+}`
+
+export const PAGE_BY_SLUG_QUERY = `*[_type == "page" && slug.current == $slug && isPublished == true][0] {
+  _id,
+  title,
+  slug,
+  metaDescription,
+  content,
+  featuredImage,
+  showInNavigation,
+  navigationOrder,
+  publishedAt,
+  _updatedAt
+}`
+
+export const NAVIGATION_PAGES_QUERY = `*[_type == "page" && isPublished == true && showInNavigation == true] | order(navigationOrder asc) {
+  _id,
+  title,
+  slug,
+  navigationOrder
+}`
+
+// Fetch functions with ISR caching
+export async function getArticles() {
+  return await sanityClient.fetch(ARTICLE_QUERY, {}, {
+    next: { 
+      revalidate: 60, // Revalidate every 60 seconds
+      tags: ['articles'] 
+    }
+  })
+}
+
+export async function getArticleBySlug(slug: string) {
+  return await sanityClient.fetch(ARTICLE_BY_SLUG_QUERY, { slug }, {
+    next: { 
+      revalidate: 3600, // Revalidate every hour for individual articles
+      tags: ['articles', `article-${slug}`] 
+    }
+  })
+}
+
+export async function getAnnouncements() {
+  return await sanityClient.fetch(ANNOUNCEMENT_QUERY, {}, {
+    next: { 
+      revalidate: 30, // Revalidate every 30 seconds for announcements (more urgent)
+      tags: ['announcements'] 
+    }
+  })
+}
+
+export async function getAnnouncementBySlug(slug: string) {
+  return await sanityClient.fetch(ANNOUNCEMENT_BY_SLUG_QUERY, { slug }, {
+    next: { 
+      revalidate: 300, // Revalidate every 5 minutes for individual announcements
+      tags: ['announcements', `announcement-${slug}`] 
+    }
+  })
+}
+
+export async function getEvents() {
+  return await sanityClient.fetch(EVENT_QUERY, {}, {
+    next: { 
+      revalidate: 300, // Revalidate every 5 minutes
+      tags: ['events'] 
+    }
+  })
+}
+
+export async function getEventBySlug(slug: string) {
+  return await sanityClient.fetch(EVENT_BY_SLUG_QUERY, { slug }, {
+    next: { 
+      revalidate: 3600, // Revalidate every hour for individual events
+      tags: ['events', `event-${slug}`] 
+    }
+  })
+}
+
+export async function getPageBySlug(slug: string) {
+  return await sanityClient.fetch(PAGE_BY_SLUG_QUERY, { slug }, {
+    next: { 
+      revalidate: 3600, // Revalidate every hour for pages
+      tags: ['pages', `page-${slug}`] 
+    }
+  })
+}
+
+export async function getNavigationPages() {
+  return await sanityClient.fetch(NAVIGATION_PAGES_QUERY, {}, {
+    next: { 
+      revalidate: 1800, // Revalidate every 30 minutes
+      tags: ['pages', 'navigation'] 
+    }
+  })
+}
+
+// Search function
+export async function searchContent(query: string) {
+  const searchQuery = `*[
+    _type in ["article", "announcement", "event", "page"] && 
+    isPublished == true && 
+    (title match $searchTerm || content[].children[].text match $searchTerm)
+  ] | order(_score desc) {
+    _id,
+    _type,
+    title,
+    slug,
+    "excerpt": select(
+      _type == "article" => excerpt,
+      _type == "announcement" => summary,
+      _type == "event" => description,
+      _type == "page" => metaDescription
+    ),
+    publishedAt,
+    _updatedAt
+  }`
+  
+  return await sanityClient.fetch(searchQuery, { searchTerm: `${query}*` })
+}
