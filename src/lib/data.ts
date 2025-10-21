@@ -77,10 +77,10 @@ export const announcements: Announcement[] = [
 ];
 
 export const downloadableFiles: DownloadableFile[] = [
-    { id: '1', name: 'Membership Application Form', description: 'Download and fill out this form to apply for membership.', url: '/forms/membership-form.pdf', isFeatured: true},
-    { id: '2', name: 'Kalkidan e.V. Bylaws', description: 'Read the official rules and regulations of our association.', url: '/forms/bylaws.pdf' },
-    { id: '3', name: 'Website Usage Guide', description: 'A helpful guide on how to use the features of this website.', url: '/forms/website-guide.pdf', isFeatured: true},
-    { id: '4', name: 'Event Contribution Form', description: 'Form for members to contribute to upcoming community events.', url: '/forms/event-contribution.pdf' },
+    { id: '1', name: 'Membership Application Form', description: 'Download and fill out this form to apply for membership.', url: '#', isFeatured: true},
+    { id: '2', name: 'Kalkidan e.V. Bylaws', description: 'Read the official rules and regulations of our association.', url: '#' },
+    { id: '3', name: 'Website Usage Guide', description: 'A helpful guide on how to use the features of this website.', url: '#', isFeatured: true},
+    { id: '4', name: 'Event Contribution Form', description: 'Form for members to contribute to upcoming community events.', url: '#' },
 ];
 
 export const members: Member[] = [

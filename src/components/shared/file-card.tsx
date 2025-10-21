@@ -1,4 +1,6 @@
 
+'use client';
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -20,11 +22,21 @@ export function FileCard({ file }: FileCardProps) {
         </div>
       </CardHeader>
       <CardFooter className="mt-auto">
-        <Button asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-          <Link href={file.url} target="_blank" download>
-            <Download className="mr-2 h-4 w-4" /> Download
-          </Link>
-        </Button>
+        {file.url === '#' ? (
+          <Button 
+            className="w-full bg-accent text-accent-foreground hover:bg-accent/90" 
+            disabled
+            onClick={() => alert('This file is not yet available. Please check back later.')}
+          >
+            <Download className="mr-2 h-4 w-4" /> Coming Soon
+          </Button>
+        ) : (
+          <Button asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+            <Link href={file.url} target="_blank" download>
+              <Download className="mr-2 h-4 w-4" /> Download
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
