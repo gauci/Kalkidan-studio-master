@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { useAuth } from '@/context/auth-context';
+import { useAuthSafe } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,15 +49,7 @@ interface FileListProps {
 
 export function FileList({ onFileChange }: FileListProps) {
   // Safely get auth context
-  let authContext;
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    // Auth context not available
-    authContext = null;
-  }
-  
-  const { user } = authContext || { user: null };
+  const { user } = useAuthSafe();
   const { toast } = useToast();
   const [deleteFileId, setDeleteFileId] = useState<string | null>(null);
 

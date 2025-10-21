@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/auth-context';
+import { useAuthSafe } from '@/context/auth-context';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Download, Trash2, Shield, Eye, FileText } from 'lucide-react';
 
 export default function PrivacySettings() {
-  const { user, token } = useAuth();
+  const { user, token } = useAuthSafe();
   const [confirmationText, setConfirmationText] = useState('');
   const [privacyPreferences, setPrivacyPreferences] = useState({
     allowAnalytics: false,

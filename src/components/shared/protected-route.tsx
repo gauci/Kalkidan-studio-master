@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/auth-context';
+import { useAuthSafe } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -15,7 +15,7 @@ export function ProtectedRoute({
   requiredRole = 'user', 
   redirectTo = '/auth/login' 
 }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthSafe();
   const router = useRouter();
 
   useEffect(() => {

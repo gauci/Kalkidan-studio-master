@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/auth-context';
+import { useAuthSafe } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { User, LogOut, LogIn } from 'lucide-react';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
 export function AuthNav() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading } = useAuthSafe();
   const router = useRouter();
   const { toast } = useToast();
 

@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { useAuth } from '@/context/auth-context';
+import { useAuthSafe } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,15 +28,7 @@ interface UploadFile {
 
 export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   // Safely get auth context
-  let authContext;
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    // Auth context not available
-    authContext = null;
-  }
-  
-  const { user } = authContext || { user: null };
+  const { user } = useAuthSafe();
   const { toast } = useToast();
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [isPublic, setIsPublic] = useState(false);
