@@ -149,9 +149,17 @@ export function useAuth() {
     return {
       user: null,
       token: null,
-      login: async () => { throw new Error('Auth not available'); },
-      register: async () => { throw new Error('Auth not available'); },
-      logout: async () => { throw new Error('Auth not available'); },
+      login: async () => { 
+        console.warn('Auth system not initialized yet');
+        throw new Error('Authentication system is initializing. Please try again in a moment.'); 
+      },
+      register: async () => { 
+        console.warn('Auth system not initialized yet');
+        throw new Error('Authentication system is initializing. Please try again in a moment.'); 
+      },
+      logout: async () => { 
+        console.warn('Auth system not initialized yet');
+      },
       isLoading: true,
     };
   }
@@ -165,10 +173,18 @@ export function useAuthSafe() {
     return {
       user: null,
       token: null,
-      login: async () => { throw new Error('Auth not available'); },
-      register: async () => { throw new Error('Auth not available'); },
-      logout: async () => { throw new Error('Auth not available'); },
-      isLoading: true,
+      login: async () => { 
+        console.warn('Auth system not available');
+        throw new Error('Authentication system is not available. Please refresh the page.'); 
+      },
+      register: async () => { 
+        console.warn('Auth system not available');
+        throw new Error('Authentication system is not available. Please refresh the page.'); 
+      },
+      logout: async () => { 
+        console.warn('Auth system not available');
+      },
+      isLoading: false,
     };
   }
 }

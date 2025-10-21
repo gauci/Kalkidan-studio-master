@@ -19,21 +19,12 @@ import {
   EditIcon
 } from 'lucide-react'
 import Link from 'next/link'
-import { useAuth } from '@/context/auth-context'
+import { useAuthSafe } from '@/context/auth-context'
 import { ContentStatus } from '@/components/shared/content-status'
 import { ContentAnalytics } from '@/components/admin/content-analytics'
 
 export default function AdminContentPage() {
-  // Safely get auth context
-  let authContext;
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    // Auth context not available during SSR
-    authContext = null;
-  }
-  
-  const { user } = authContext || { user: null };
+  const { user } = useAuthSafe();
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isClient, setIsClient] = useState(false)
@@ -42,11 +33,45 @@ export default function AdminContentPage() {
     setIsClient(true);
   }, []);
   const [contentStats, setContentStats] = useState({
-    articles: { total: 0, published: 0, drafts: 0 },
-    announcements: { total: 0, published: 0, drafts: 0 },
-    events: { total: 0, published: 0, drafts: 0 },
-    pages: { total: 0, published: 0, drafts: 0 },
+    articles: { total: 12, published: 8, drafts: 4 },
+    announcements: { total: 25, published: 20, drafts: 5 },
+    events: { total: 8, published: 6, drafts: 2 },
+    pages: { total: 15, published: 12, drafts: 3 },
   })
+
+  const [recentContent, setRecentContent] = useState([
+    { id: 1, title: 'Community Meeting Minutes', type: 'article', status: 'published', date: '2024-01-15' },
+    { id: 2, title: 'New Member Welcome', type: 'announcement', status: 'draft', date: '2024-01-14' },
+    { id: 3, title: 'Annual Fundraiser Event', type: 'event', status: 'published', date: '2024-01-13' },
+    { id: 4, title: 'About Us Page Update', type: 'page', status: 'published', date: '2024-01-12' },
+  ])
+
+  const handleRefreshContent = async () => {
+    setIsLoading(true)
+    // Simulate API call to refresh content from Sanity
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'published': return 'bg-green-100 text-green-800'
+      case 'draft': return 'bg-yellow-100 text-yellow-800'
+      case 'scheduled': return 'bg-blue-100 text-blue-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'article': return <FileTextIcon className="h-4 w-4" />
+      case 'announcement': return <MegaphoneIcon className="h-4 w-4" />
+      case 'event': return <CalendarIcon className="h-4 w-4" />
+      case 'page': return <FileIcon className="h-4 w-4" />
+      default: return <FileTextIcon className="h-4 w-4" />
+    }
+  }
 
   // Mock data - in real implementation, fetch from Sanity
   const recentContent = [
@@ -114,6 +139,176 @@ export default function AdminContentPage() {
         </p>
       </div>
     )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-headline">Content Management</h1>
+          <p className="text-muted-foreground">
+            Manage articles, announcements, events, and pages
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleRefreshContent}
+            disabled={isLoading}
+          >
+            <RefreshCwIcon className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button asChild>
+            <Link href="https://kalkidan-cms.sanity.studio" target="_blank">
+              <ExternalLinkIcon className="h-4 w-4 mr-2" />
+              Open Sanity Studio
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Content Analytics */}
+      <ContentAnalytics />
+
+      {/* Content Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {Object.entries(contentStats).map(([type, stats]) => (
+          <Card key={type}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium capitalize">
+                {type}
+              </CardTitle>
+              {getTypeIcon(type)}
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="flex gap-4 text-xs text-muted-foreground">
+                <span>{stats.published} published</span>
+                <span>{stats.drafts} drafts</span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Content Management Tabs */}
+      <Tabs defaultValue="recent" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="recent">Recent Content</TabsTrigger>
+          <TabsTrigger value="drafts">Drafts</TabsTrigger>
+          <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="recent" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Recent Content</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <SearchIcon className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search content..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-64"
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentContent.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      {getTypeIcon(item.type)}
+                      <div>
+                        <h4 className="font-medium">{item.title}</h4>
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <span className="capitalize">{item.type}</span>
+                          <span>•</span>
+                          <span>{new Date(item.date).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge className={getStatusColor(item.status)}>
+                        {item.status}
+                      </Badge>
+                      <Button variant="ghost" size="sm">
+                        <EyeIcon className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <EditIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="drafts">
+          <Card>
+            <CardHeader>
+              <CardTitle>Draft Content</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">No drafts available.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="scheduled">
+          <Card>
+            <CardHeader>
+              <CardTitle>Scheduled Content</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">No scheduled content.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Button asChild variant="outline" className="h-20 flex-col">
+              <Link href="https://kalkidan-cms.sanity.studio/structure/article" target="_blank">
+                <FileTextIcon className="h-6 w-6 mb-2" />
+                New Article
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="h-20 flex-col">
+              <Link href="https://kalkidan-cms.sanity.studio/structure/announcement" target="_blank">
+                <MegaphoneIcon className="h-6 w-6 mb-2" />
+                New Announcement
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="h-20 flex-col">
+              <Link href="https://kalkidan-cms.sanity.studio/structure/event" target="_blank">
+                <CalendarIcon className="h-6 w-6 mb-2" />
+                New Event
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="h-20 flex-col">
+              <Link href="https://kalkidan-cms.sanity.studio/structure/page" target="_blank">
+                <FileIcon className="h-6 w-6 mb-2" />
+                New Page
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
   }
 
   return (

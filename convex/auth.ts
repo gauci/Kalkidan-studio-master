@@ -539,3 +539,71 @@ export const toggleUserStatus = mutation({
     };
   },
 });
+// 
+Promote user to admin (for bootstrapping)
+export const promoteToAdmin = mutation({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Find user by email
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .first();
+
+    if (!user) {
+      throw new Error(`User with email ${args.email} not found`);
+    }
+
+    if (user.role === "admin") {
+      throw new Error(`User ${args.email} is already an admin`);
+    }
+
+    // Update user role to admin
+    await ctx.db.patch(user._id, {
+      role: "admin",
+    });
+
+    return {
+      success: true,
+      message: `User ${args.email} has been promoted to admin`,
+      userId: user._id,
+    };
+  },
+});
+
+// List all users (admin only)
+export const listUsers = query({
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify admin session
+    const session = await ctx.db
+      .query("sessions")
+      .filter((q) => q.eq(q.field("token"), args.token))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    const user = await ctx.db.get(session.userId);
+    if (!user || user.role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    // Return all users (excluding sensitive data)
+    const users = await ctx.db.query("users").collect();
+    return users.map(user => ({
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      emailVerified: user.emailVerified,
+      createdAt: user.createdAt,
+      lastLogin: user.lastLogin,
+    }));
+  },
+});

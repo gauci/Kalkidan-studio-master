@@ -1,43 +1,88 @@
-
 'use client';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Download, FileText } from "lucide-react";
-import type { DownloadableFile } from "@/lib/data";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { FileIcon, DownloadIcon, TrashIcon } from 'lucide-react';
 
-type FileCardProps = {
-  file: DownloadableFile;
-};
+interface FileCardProps {
+  file: {
+    _id: string;
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    uploadedAt: number;
+    isPublic?: boolean;
+  };
+  onDownload?: (fileId: string) => void;
+  onDelete?: (fileId: string) => void;
+  showActions?: boolean;
+}
 
-export function FileCard({ file }: FileCardProps) {
+export function FileCard({ file, onDownload, onDelete, showActions = true }: FileCardProps) {
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString();
+  };
+
   return (
-    <Card className="flex flex-col border-primary/20 hover:shadow-lg transition-shadow">
-      <CardHeader className="flex flex-row items-start gap-4">
-        <FileText className="h-8 w-8 text-primary mt-1" />
-        <div>
-          <CardTitle className="text-xl">{file.name}</CardTitle>
-          <CardDescription className="mt-1">{file.description}</CardDescription>
-        </div>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <FileIcon className="h-4 w-4" />
+          {file.fileName}
+        </CardTitle>
       </CardHeader>
-      <CardFooter className="mt-auto">
-        {file.url === '#' ? (
-          <Button 
-            className="w-full bg-accent text-accent-foreground hover:bg-accent/90" 
-            disabled
-            onClick={() => alert('This file is not yet available. Please check back later.')}
-          >
-            <Download className="mr-2 h-4 w-4" /> Coming Soon
-          </Button>
-        ) : (
-          <Button asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-            <Link href={file.url} target="_blank" download>
-              <Download className="mr-2 h-4 w-4" /> Download
-            </Link>
-          </Button>
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{formatFileSize(file.fileSize)}</span>
+          <span>{formatDate(file.uploadedAt)}</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs">
+            {file.fileType}
+          </Badge>
+          {file.isPublic && (
+            <Badge variant="secondary" className="text-xs">
+              Public
+            </Badge>
+          )}
+        </div>
+
+        {showActions && (
+          <div className="flex gap-2 pt-2">
+            {onDownload && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDownload(file._id)}
+                className="flex-1"
+              >
+                <DownloadIcon className="h-3 w-3 mr-1" />
+                Download
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete(file._id)}
+                className="text-destructive hover:text-destructive"
+              >
+                <TrashIcon className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         )}
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 }
