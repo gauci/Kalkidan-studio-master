@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Files, User, Download, LogOut, Shield } from 'lucide-react';
@@ -10,11 +11,34 @@ import { useToast } from '@/hooks/use-toast';
 import { UserProfileCard } from '@/components/dashboard/user-profile-card';
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available during SSR
+    authContext = null;
+  }
+  
+  const { user, logout } = authContext || { user: null, logout: null };
 
   const handleLogout = async () => {
+    if (!logout) {
+      toast({
+        title: "Error",
+        description: "Logout service is not available. Please refresh the page.",
+        variant: "destructive",
+      });
+      return;
+    }
     try {
       await logout();
       toast({
@@ -30,6 +54,17 @@ export default function DashboardPage() {
       });
     }
   };
+
+  // Show loading state if not on client side yet
+  if (!isClient) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

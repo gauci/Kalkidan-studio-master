@@ -19,19 +19,43 @@ interface User {
 }
 
 export default function AdminUsersPage() {
-  const { user, token } = useAuth();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [newRole, setNewRole] = useState<'user' | 'admin'>('user');
+  const [isClient, setIsClient] = useState(false);
 
-  // Queries and mutations
-  const usersData = useQuery(api.auth.getAllUsers, 
-    token ? { adminToken: token, limit: 100 } : 'skip'
-  );
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available during SSR
+    authContext = null;
+  }
   
-  const updateUserRole = useMutation(api.auth.updateUserRole);
-  const toggleUserStatus = useMutation(api.auth.toggleUserStatus);
+  const { user, token } = authContext || { user: null, token: null };
+
+  // Safely use Convex hooks only on client side
+  let usersData, updateUserRole, toggleUserStatus;
+  
+  try {
+    usersData = isClient ? useQuery(api.auth.getAllUsers, 
+      token ? { adminToken: token, limit: 100 } : 'skip'
+    ) : undefined;
+    
+    updateUserRole = isClient ? useMutation(api.auth.updateUserRole) : null;
+    toggleUserStatus = isClient ? useMutation(api.auth.toggleUserStatus) : null;
+  } catch (error) {
+    // Convex not available
+    usersData = undefined;
+    updateUserRole = null;
+    toggleUserStatus = null;
+  }
 
   // Redirect if not admin
   useEffect(() => {
@@ -39,6 +63,17 @@ export default function AdminUsersPage() {
       window.location.href = '/dashboard';
     }
   }, [user]);
+
+  // Show loading state if not on client side yet
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading user management...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user || user.role !== 'admin') {
     return (
@@ -52,7 +87,10 @@ export default function AdminUsersPage() {
   }
 
   const handleRoleChange = async () => {
-    if (!selectedUser || !token) return;
+    if (!selectedUser || !token || !updateUserRole) {
+      alert('User management service is not available. Please refresh the page.');
+      return;
+    }
 
     try {
       await updateUserRole({
@@ -69,7 +107,10 @@ export default function AdminUsersPage() {
   };
 
   const handleToggleStatus = async (userId: Id<"users">) => {
-    if (!token) return;
+    if (!token || !toggleUserStatus) {
+      alert('User management service is not available. Please refresh the page.');
+      return;
+    }
 
     try {
       await toggleUserStatus({

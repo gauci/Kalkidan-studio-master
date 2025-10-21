@@ -48,19 +48,35 @@ interface FileListProps {
 }
 
 export function FileList({ onFileChange }: FileListProps) {
-  const { user } = useAuth();
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available
+    authContext = null;
+  }
+  
+  const { user } = authContext || { user: null };
   const { toast } = useToast();
   const [deleteFileId, setDeleteFileId] = useState<string | null>(null);
 
   const sessionToken = typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null;
   
-  const files = useQuery(
-    api.files.getUserFiles,
-    sessionToken ? { token: sessionToken } : 'skip'
-  );
-
-  const getFileUrl = useMutation(api.files.getFileUrl);
-  const deleteFile = useMutation(api.files.deleteFile);
+  // Safely use Convex hooks
+  let files, getFileUrl, deleteFile;
+  try {
+    files = useQuery(
+      api.files.getUserFiles,
+      sessionToken ? { token: sessionToken } : 'skip'
+    );
+    getFileUrl = useMutation(api.files.getFileUrl);
+    deleteFile = useMutation(api.files.deleteFile);
+  } catch (error) {
+    files = undefined;
+    getFileUrl = null;
+    deleteFile = null;
+  }
 
   const handleDownload = async (fileId: string) => {
     if (!sessionToken) return;

@@ -22,25 +22,50 @@ import {
 } from 'lucide-react';
 
 export default function SecurityMonitoring() {
-  const { token } = useAuth();
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  // Queries
-  const healthMetrics = useQuery(api.monitoring?.getSystemHealthMetrics, 
-    token ? { adminToken: token } : 'skip'
-  );
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available during SSR
+    authContext = null;
+  }
   
-  const securityIncidents = useQuery(api.monitoring?.getSecurityIncidents,
-    token ? { adminToken: token, limit: 10 } : 'skip'
-  );
+  const { token } = authContext || { token: null };
 
-  const suspiciousActivity = useQuery(api.security.detectSuspiciousActivity,
-    token ? { token } : 'skip'
-  );
+  // Safely use Convex hooks only on client side
+  let healthMetrics, securityIncidents, suspiciousActivity, detectThreats, updateIncidentStatus;
+  
+  try {
+    healthMetrics = isClient ? useQuery(api.monitoring?.getSystemHealthMetrics, 
+      token ? { adminToken: token } : 'skip'
+    ) : undefined;
+    
+    securityIncidents = isClient ? useQuery(api.monitoring?.getSecurityIncidents,
+      token ? { adminToken: token, limit: 10 } : 'skip'
+    ) : undefined;
 
-  // Mutations
-  const detectThreats = useMutation(api.monitoring?.detectThreats);
-  const updateIncidentStatus = useMutation(api.monitoring?.updateIncidentStatus);
+    suspiciousActivity = isClient ? useQuery(api.security.detectSuspiciousActivity,
+      token ? { token } : 'skip'
+    ) : undefined;
+
+    detectThreats = isClient ? useMutation(api.monitoring?.detectThreats) : null;
+    updateIncidentStatus = isClient ? useMutation(api.monitoring?.updateIncidentStatus) : null;
+  } catch (error) {
+    // Convex not available
+    healthMetrics = undefined;
+    securityIncidents = undefined;
+    suspiciousActivity = undefined;
+    detectThreats = null;
+    updateIncidentStatus = null;
+  }
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -56,6 +81,10 @@ export default function SecurityMonitoring() {
   }, []);
 
   const handleRunThreatDetection = async () => {
+    if (!detectThreats) {
+      alert('Security monitoring service is not available. Please refresh the page.');
+      return;
+    }
     try {
       const result = await detectThreats({});
       alert(`Threat detection completed. ${result.threatsDetected} threats detected.`);
@@ -66,9 +95,13 @@ export default function SecurityMonitoring() {
   };
 
   const handleUpdateIncident = async (incidentId: string, status: string) => {
+    if (!updateIncidentStatus || !token) {
+      alert('Security monitoring service is not available. Please refresh the page.');
+      return;
+    }
     try {
       await updateIncidentStatus({
-        adminToken: token!,
+        adminToken: token,
         incidentId: incidentId as any,
         status: status as any,
       });
@@ -106,6 +139,23 @@ export default function SecurityMonitoring() {
       default: return <Activity className="h-5 w-5 text-gray-500" />;
     }
   };
+
+  // Show loading state if not on client side yet
+  if (!isClient) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-6 w-6 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Security Monitoring</h1>
+          </div>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Loading security monitoring...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

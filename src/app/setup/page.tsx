@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useRouter } from 'next/navigation';
@@ -17,13 +17,36 @@ export default function SetupPage() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   
-  const createFirstAdmin = useMutation(api.auth.createFirstAdmin);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  // Only use Convex hooks on client side
+  let createFirstAdmin = null;
+  try {
+    createFirstAdmin = isClient ? useMutation(api.auth.createFirstAdmin) : null;
+  } catch (error) {
+    // Convex not available
+    createFirstAdmin = null;
+  }
+  
   const { toast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!createFirstAdmin) {
+      toast({
+        title: "Setup Error",
+        description: "Setup service is not available. Please refresh the page and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -49,6 +72,26 @@ export default function SetupPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading state if not on client side yet
+  if (!isClient) {
+    return (
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-background">
+        <div className="absolute inset-0 z-0">
+          <EthiopianPattern className="opacity-20" />
+        </div>
+        <div className="relative z-10 w-full max-w-md p-4">
+          <Card className="border-primary shadow-2xl">
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Loading setup...</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-background">

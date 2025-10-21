@@ -27,15 +27,31 @@ interface UploadFile {
 }
 
 export function FileUpload({ onUploadSuccess }: FileUploadProps) {
-  const { user } = useAuth();
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available
+    authContext = null;
+  }
+  
+  const { user } = authContext || { user: null };
   const { toast } = useToast();
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [isPublic, setIsPublic] = useState(false);
   const [description, setDescription] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
-  const createFileRecord = useMutation(api.files.createFileRecord);
+  // Safely use Convex hooks
+  let generateUploadUrl, createFileRecord;
+  try {
+    generateUploadUrl = useMutation(api.files.generateUploadUrl);
+    createFileRecord = useMutation(api.files.createFileRecord);
+  } catch (error) {
+    generateUploadUrl = null;
+    createFileRecord = null;
+  }
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({

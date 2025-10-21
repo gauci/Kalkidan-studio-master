@@ -6,7 +6,16 @@ import { useAuth } from '@/context/auth-context';
 import { User as UserIcon, Mail, Phone, MapPin, Shield } from 'lucide-react';
 
 export function UserProfileCard() {
-  const { user } = useAuth();
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available
+    authContext = null;
+  }
+  
+  const { user } = authContext || { user: null };
 
   if (!user) return null;
 

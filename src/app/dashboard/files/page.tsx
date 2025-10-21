@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Upload, FileText, Download, Trash2, Eye, EyeOff } from 'lucide-react';
@@ -10,14 +10,40 @@ import { FileList } from '@/components/dashboard/file-list';
 import { FileStats } from '@/components/dashboard/file-stats';
 
 export default function FilesPage() {
-  const { user } = useAuth();
   const [showUpload, setShowUpload] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available during SSR
+    authContext = null;
+  }
+  
+  const { user } = authContext || { user: null };
 
   const handleUploadSuccess = () => {
     setShowUpload(false);
     setRefreshTrigger(prev => prev + 1);
   };
+
+  // Show loading state if not on client side yet
+  if (!isClient) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Loading file management...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

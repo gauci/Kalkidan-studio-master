@@ -24,9 +24,23 @@ import { ContentStatus } from '@/components/shared/content-status'
 import { ContentAnalytics } from '@/components/admin/content-analytics'
 
 export default function AdminContentPage() {
-  const { user } = useAuth()
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available during SSR
+    authContext = null;
+  }
+  
+  const { user } = authContext || { user: null };
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   const [contentStats, setContentStats] = useState({
     articles: { total: 0, published: 0, drafts: 0 },
     announcements: { total: 0, published: 0, drafts: 0 },
@@ -77,8 +91,19 @@ export default function AdminContentPage() {
   }
 
   useEffect(() => {
-    refreshStats()
-  }, [])
+    if (isClient) {
+      refreshStats()
+    }
+  }, [isClient])
+
+  // Show loading state if not on client side yet
+  if (!isClient) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading content management...</p>
+      </div>
+    )
+  }
 
   if (user?.role !== 'admin') {
     return (

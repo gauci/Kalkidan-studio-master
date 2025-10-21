@@ -8,10 +8,16 @@ import { Files, HardDrive, Eye, EyeOff } from 'lucide-react';
 export function FileStats() {
   const sessionToken = typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null;
   
-  const stats = useQuery(
-    api.files.getFileStats,
-    sessionToken ? { token: sessionToken } : 'skip'
-  );
+  // Safely use Convex hooks
+  let stats;
+  try {
+    stats = useQuery(
+      api.files.getFileStats,
+      sessionToken ? { token: sessionToken } : 'skip'
+    );
+  } catch (error) {
+    stats = undefined;
+  }
 
   if (!stats) {
     return (
