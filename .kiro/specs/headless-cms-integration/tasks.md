@@ -11,6 +11,7 @@
 
 
 
+
   - [x] 1.1 Fix Next.js configuration for proper SSR/CSR handling
 
 
