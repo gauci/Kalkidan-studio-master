@@ -66,10 +66,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Only use Convex hooks when ready
+  // Only use Convex hooks when ready and available
   let loginMutation, registerMutation, logoutMutation, currentUser;
+  let isInConvexProvider = false;
   
   try {
+    // Check if we're inside a ConvexProvider by trying to use a hook
+    const testHook = useMutation;
+    isInConvexProvider = true;
+    
     loginMutation = isConvexReady ? useMutation(api.auth.loginUser) : null;
     registerMutation = isConvexReady ? useMutation(api.auth.registerUser) : null;
     logoutMutation = isConvexReady ? useMutation(api.auth.logoutUser) : null;
@@ -79,7 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ? useQuery(api.auth.getCurrentUser, { token: sessionToken })
       : undefined;
   } catch (error) {
-    // Convex not available, use null values
+    // Not in ConvexProvider or Convex not available
+    isInConvexProvider = false;
     loginMutation = null;
     registerMutation = null;
     logoutMutation = null;

@@ -41,11 +41,26 @@ function ConvexProviderWrapper({ children }: { children: React.ReactNode }) {
     }
   }, [isClient]);
 
-  // Render without Convex on server-side or if client not ready
-  if (!isClient || !convexClient) {
-    return <>{children}</>;
+  // Always provide AuthProvider, but with different Convex availability
+  if (!isClient) {
+    // Server-side: provide auth context without Convex
+    return (
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    );
   }
 
+  if (!convexClient) {
+    // Client-side but no Convex: provide auth context without Convex
+    return (
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    );
+  }
+
+  // Client-side with Convex: provide full functionality
   return (
     <ConvexProvider client={convexClient}>
       <AuthProvider>

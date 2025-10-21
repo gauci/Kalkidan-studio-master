@@ -22,7 +22,7 @@ export async function generateStaticParams() {
     }
     return articles.map((article: any) => ({
       slug: article.slug?.current || article.slug,
-    })).filter(param => param.slug) // Filter out any invalid slugs
+    })).filter((param: any) => param.slug) // Filter out any invalid slugs
   } catch (error) {
     console.warn('Failed to generate static params for articles:', error)
     return []
@@ -30,40 +30,50 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ArticlePageProps) {
-  const article = await getArticleBySlug(params.slug)
-  
-  if (!article) {
-    return {
-      title: 'Article Not Found',
+  try {
+    const article = await getArticleBySlug(params.slug)
+    
+    if (!article) {
+      return {
+        title: 'Article Not Found - Kalkidan News',
+        description: 'The requested article could not be found.',
+      }
     }
-  }
 
-  return {
-    title: `${article.title} - Kalkidan News`,
-    description: article.excerpt || `Read ${article.title} on Kalkidan News`,
-    openGraph: {
-      title: article.title,
-      description: article.excerpt,
-      images: article.featuredImage ? [
-        {
-          url: urlFor(article.featuredImage).width(1200).height(630).fit('crop').auto('format').url(),
-          width: 1200,
-          height: 630,
-          alt: article.featuredImage.alt || article.title,
-        }
-      ] : [],
-    },
+    return {
+      title: `${article.title} - Kalkidan News`,
+      description: article.excerpt || `Read ${article.title} on Kalkidan News`,
+      openGraph: {
+        title: article.title,
+        description: article.excerpt,
+        images: article.featuredImage ? [
+          {
+            url: urlFor(article.featuredImage).width(1200).height(630).fit('crop').auto('format').url(),
+            width: 1200,
+            height: 630,
+            alt: article.featuredImage.alt || article.title,
+          }
+        ] : [],
+      },
+    }
+  } catch (error) {
+    console.error('Error generating metadata for article:', error)
+    return {
+      title: 'Article - Kalkidan News',
+      description: 'Kalkidan community news and articles.',
+    }
   }
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const article = await getArticleBySlug(params.slug)
+  try {
+    const article = await getArticleBySlug(params.slug)
 
-  if (!article) {
-    notFound()
-  }
+    if (!article) {
+      notFound()
+    }
 
-  const readingTime = Math.ceil((article.content?.length || 0) / 200)
+    const readingTime = Math.ceil((article.content?.length || 0) / 200)
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -164,4 +174,25 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('Error rendering article page:', error)
+    
+    // Return a fallback error page
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-headline mb-4">Article Unavailable</h1>
+          <p className="text-muted-foreground mb-6">
+            We're sorry, but this article is currently unavailable. This might be due to a temporary issue with our content system.
+          </p>
+          <Link href="/news">
+            <Button>
+              <ArrowLeftIcon className="h-4 w-4 mr-2" />
+              Back to News
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
 }

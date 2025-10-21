@@ -21,7 +21,7 @@ export async function generateStaticParams() {
     }
     return announcements.map((announcement: any) => ({
       slug: announcement.slug?.current || announcement.slug,
-    })).filter(param => param.slug) // Filter out any invalid slugs
+    })).filter((param: any) => param.slug) // Filter out any invalid slugs
   } catch (error) {
     console.warn('Failed to generate static params for announcements:', error)
     return []
@@ -29,26 +29,36 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: AnnouncementPageProps) {
-  const announcement = await getAnnouncementBySlug(params.slug)
-  
-  if (!announcement) {
-    return {
-      title: 'Announcement Not Found',
+  try {
+    const announcement = await getAnnouncementBySlug(params.slug)
+    
+    if (!announcement) {
+      return {
+        title: 'Announcement Not Found - Kalkidan',
+        description: 'The requested announcement could not be found.',
+      }
     }
-  }
 
-  return {
-    title: `${announcement.title} - Kalkidan Announcements`,
-    description: announcement.summary || `Read ${announcement.title} announcement from Kalkidan`,
+    return {
+      title: `${announcement.title} - Kalkidan Announcements`,
+      description: announcement.summary || `Read ${announcement.title} announcement from Kalkidan`,
+    }
+  } catch (error) {
+    console.error('Error generating metadata for announcement:', error)
+    return {
+      title: 'Announcement - Kalkidan',
+      description: 'Kalkidan community announcements.',
+    }
   }
 }
 
 export default async function AnnouncementPage({ params }: AnnouncementPageProps) {
-  const announcement = await getAnnouncementBySlug(params.slug)
+  try {
+    const announcement = await getAnnouncementBySlug(params.slug)
 
-  if (!announcement) {
-    notFound()
-  }
+    if (!announcement) {
+      notFound()
+    }
 
   const priorityColors = {
     urgent: 'destructive',
@@ -84,7 +94,7 @@ export default async function AnnouncementPage({ params }: AnnouncementPageProps
         <header className="mb-8 space-y-6">
           {/* Priority and Status Badges */}
           <div className="flex flex-wrap items-center gap-3">
-            <Badge variant={priorityColors[announcement.priority as keyof typeof priorityColors]} className="text-sm">
+            <Badge variant={priorityColors[announcement.priority as keyof typeof priorityColors] as "destructive" | "secondary" | "outline" | "default"} className="text-sm">
               {priorityEmojis[announcement.priority as keyof typeof priorityEmojis]} {announcement.priority.toUpperCase()} PRIORITY
             </Badge>
             {announcement.isPinned && (
@@ -217,4 +227,25 @@ export default async function AnnouncementPage({ params }: AnnouncementPageProps
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('Error rendering announcement page:', error)
+    
+    // Return a fallback error page
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-headline mb-4">Announcement Unavailable</h1>
+          <p className="text-muted-foreground mb-6">
+            We're sorry, but this announcement is currently unavailable. This might be due to a temporary issue with our content system.
+          </p>
+          <Link href="/news">
+            <Button>
+              <ArrowLeftIcon className="h-4 w-4 mr-2" />
+              Back to News
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
 }
