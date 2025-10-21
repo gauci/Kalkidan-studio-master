@@ -37,16 +37,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConvexReady, setIsConvexReady] = useState(false);
 
-  // Only use Convex hooks on client side
-  const loginMutation = typeof window !== 'undefined' ? useMutation(api.auth.loginUser) : null;
-  const registerMutation = typeof window !== 'undefined' ? useMutation(api.auth.registerUser) : null;
-  const logoutMutation = typeof window !== 'undefined' ? useMutation(api.auth.logoutUser) : null;
+  // Check if we're in a Convex provider context
+  useEffect(() => {
+    // Small delay to ensure Convex provider is ready
+    const timer = setTimeout(() => {
+      setIsConvexReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Only use Convex hooks when ready
+  let loginMutation, registerMutation, logoutMutation, currentUser;
   
-  // Verify session on mount (only on client side)
-  const currentUser = typeof window !== 'undefined' && sessionToken 
-    ? useQuery(api.auth.getCurrentUser, { token: sessionToken })
-    : undefined;
+  try {
+    loginMutation = isConvexReady ? useMutation(api.auth.loginUser) : null;
+    registerMutation = isConvexReady ? useMutation(api.auth.registerUser) : null;
+    logoutMutation = isConvexReady ? useMutation(api.auth.logoutUser) : null;
+    
+    // Verify session on mount (only when Convex is ready)
+    currentUser = isConvexReady && sessionToken 
+      ? useQuery(api.auth.getCurrentUser, { token: sessionToken })
+      : undefined;
+  } catch (error) {
+    // Convex not available, use null values
+    loginMutation = null;
+    registerMutation = null;
+    logoutMutation = null;
+    currentUser = undefined;
+  }
 
   useEffect(() => {
     // Check for existing session token (only on client side)
@@ -70,8 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser]);
 
   const login = async (email: string, password: string) => {
-    if (!loginMutation) {
-      throw new Error('Login not available on server side');
+    if (!loginMutation || !isConvexReady) {
+      throw new Error('Authentication service not available. Please try again in a moment.');
     }
     try {
       const result = await loginMutation({ email, password });
@@ -87,8 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
-    if (!registerMutation) {
-      throw new Error('Registration not available on server side');
+    if (!registerMutation || !isConvexReady) {
+      throw new Error('Registration service not available. Please try again in a moment.');
     }
     try {
       const result = await registerMutation(data);

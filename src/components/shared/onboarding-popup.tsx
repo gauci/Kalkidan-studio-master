@@ -6,28 +6,25 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
 export function OnboardingPopup() {
+  const [isClient, setIsClient] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(true);
 
   useEffect(() => {
-    // Only run on client side
-    if (typeof window !== 'undefined') {
-      const seen = localStorage.getItem('hasSeenOnboarding');
-      if (!seen) {
-        setHasSeenOnboarding(false);
-        setIsOpen(true);
-      }
+    setIsClient(true);
+    // Check if user has seen onboarding
+    const seen = localStorage.getItem('hasSeenOnboarding');
+    if (!seen) {
+      setIsOpen(true);
     }
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('hasSeenOnboarding', 'true');
-    }
+    localStorage.setItem('hasSeenOnboarding', 'true');
   };
 
-  if (hasSeenOnboarding) {
+  // Don't render anything on server-side
+  if (!isClient) {
     return null;
   }
 

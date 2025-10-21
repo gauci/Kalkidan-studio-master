@@ -78,7 +78,17 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const { toast } = useToast();
   const router = useRouter();
-  const { login, register } = useAuth();
+  
+  // Safely get auth context
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth context not available
+    authContext = null;
+  }
+  
+  const { login, register } = authContext || { login: null, register: null };
   const [isLoading, setIsLoading] = useState(false);
   const [rateLimitInfo, setRateLimitInfo] = useState<{
     remaining?: number;
@@ -132,6 +142,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       });
 
       if (isLogin) {
+        if (!login) {
+          throw new Error("Authentication service is not available. Please refresh the page and try again.");
+        }
         await login(data.email, data.password);
         toast({
           title: "Login Successful",
@@ -139,6 +152,9 @@ export function AuthForm({ mode }: AuthFormProps) {
         });
         router.push("/dashboard");
       } else {
+        if (!register) {
+          throw new Error("Registration service is not available. Please refresh the page and try again.");
+        }
         // Remove confirmPassword before sending to backend
         const { confirmPassword, ...registerData } = data as any;
         await register(registerData);
@@ -167,6 +183,17 @@ export function AuthForm({ mode }: AuthFormProps) {
       setPasswordStrength(validation.strength || '');
     }
   };
+
+  // Show loading state if auth service isn't ready
+  if (!authContext) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Loading authentication service...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
