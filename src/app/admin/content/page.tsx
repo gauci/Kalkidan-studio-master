@@ -40,10 +40,30 @@ export default function AdminContentPage() {
   })
 
   const [recentContent, setRecentContent] = useState([
-    { id: 1, title: 'Community Meeting Minutes', type: 'article', status: 'published', date: '2024-01-15' },
-    { id: 2, title: 'New Member Welcome', type: 'announcement', status: 'draft', date: '2024-01-14' },
-    { id: 3, title: 'Annual Fundraiser Event', type: 'event', status: 'published', date: '2024-01-13' },
-    { id: 4, title: 'About Us Page Update', type: 'page', status: 'published', date: '2024-01-12' },
+    {
+      id: '1',
+      type: 'article',
+      title: 'Community Update: New Programs Launched',
+      status: 'published',
+      lastUpdated: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      author: 'Admin User',
+    },
+    {
+      id: '2',
+      type: 'announcement',
+      title: 'Important: Meeting Schedule Change',
+      status: 'published',
+      lastUpdated: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      author: 'Admin User',
+    },
+    {
+      id: '3',
+      type: 'event',
+      title: 'Annual Cultural Festival 2024',
+      status: 'draft',
+      lastUpdated: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      author: 'Admin User',
+    },
   ])
 
   const handleRefreshContent = async () => {
@@ -73,33 +93,7 @@ export default function AdminContentPage() {
     }
   }
 
-  // Mock data - in real implementation, fetch from Sanity
-  const recentContent = [
-    {
-      id: '1',
-      type: 'article',
-      title: 'Community Update: New Programs Launched',
-      status: 'published',
-      lastUpdated: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      author: 'Admin User',
-    },
-    {
-      id: '2',
-      type: 'announcement',
-      title: 'Important: Meeting Schedule Change',
-      status: 'published',
-      lastUpdated: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-      author: 'Admin User',
-    },
-    {
-      id: '3',
-      type: 'event',
-      title: 'Annual Cultural Festival 2024',
-      status: 'draft',
-      lastUpdated: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      author: 'Admin User',
-    },
-  ]
+
 
   const refreshStats = async () => {
     setIsLoading(true)
@@ -228,7 +222,7 @@ export default function AdminContentPage() {
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                           <span className="capitalize">{item.type}</span>
                           <span>•</span>
-                          <span>{new Date(item.date).toLocaleDateString()}</span>
+                          <span>{new Date(item.lastUpdated).toLocaleDateString()}</span>
                         </div>
                       </div>
                     </div>
@@ -308,8 +302,7 @@ export default function AdminContentPage() {
         </CardContent>
       </Card>
     </div>
-  )
-  }
+  );
 
   return (
     <div className="space-y-8">
