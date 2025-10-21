@@ -153,6 +153,11 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 
+  // Skip static generation for pages that use authentication
+  async generateBuildId() {
+    return 'build-' + Date.now();
+  },
+
   // Environment variables validation
   env: {
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,

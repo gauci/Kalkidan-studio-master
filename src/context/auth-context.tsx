@@ -145,7 +145,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Return a safe default instead of throwing during SSR
+    return {
+      user: null,
+      token: null,
+      login: async () => { throw new Error('Auth not available'); },
+      register: async () => { throw new Error('Auth not available'); },
+      logout: async () => { throw new Error('Auth not available'); },
+      isLoading: true,
+    };
   }
   return context;
+}
+
+export function useAuthSafe() {
+  try {
+    return useAuth();
+  } catch (error) {
+    return {
+      user: null,
+      token: null,
+      login: async () => { throw new Error('Auth not available'); },
+      register: async () => { throw new Error('Auth not available'); },
+      logout: async () => { throw new Error('Auth not available'); },
+      isLoading: true,
+    };
+  }
 }
