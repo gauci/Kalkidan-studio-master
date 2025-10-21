@@ -41,11 +41,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check if we're in a Convex provider context
   useEffect(() => {
-    // Small delay to ensure Convex provider is ready
-    const timer = setTimeout(() => {
-      setIsConvexReady(true);
-    }, 100);
-    return () => clearTimeout(timer);
+    // Check if Convex is available immediately, then set a shorter fallback
+    const checkConvex = () => {
+      try {
+        // Try to access Convex API to see if it's available
+        if (typeof api !== 'undefined') {
+          setIsConvexReady(true);
+          return;
+        }
+      } catch (error) {
+        // Convex not ready yet
+      }
+      
+      // Fallback timer with shorter delay
+      const timer = setTimeout(() => {
+        setIsConvexReady(true);
+      }, 50);
+      return timer;
+    };
+
+    const timer = checkConvex();
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   // Only use Convex hooks when ready
@@ -86,8 +104,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentUser !== undefined) {
       setUser(currentUser);
       setIsLoading(false);
+    } else if (isConvexReady && !sessionToken) {
+      // If Convex is ready but no session token, stop loading
+      setIsLoading(false);
     }
-  }, [currentUser]);
+  }, [currentUser, isConvexReady, sessionToken]);
 
   const login = async (email: string, password: string) => {
     if (!loginMutation || !isConvexReady) {
@@ -145,22 +166,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    // Return a safe default instead of throwing during SSR
+    // Check if we're on the client side and wait a bit longer
+    if (typeof window !== 'undefined') {
+      // Return a more user-friendly loading state
+      return {
+        user: null,
+        token: null,
+        login: async () => { 
+          throw new Error('Please wait a moment for the system to initialize, then try again.'); 
+        },
+        register: async () => { 
+          throw new Error('Please wait a moment for the system to initialize, then try again.'); 
+        },
+        logout: async () => { 
+          console.warn('Auth system not ready yet');
+        },
+        isLoading: true,
+      };
+    }
+    
+    // Server-side fallback
     return {
       user: null,
       token: null,
       login: async () => { 
-        console.warn('Auth system not initialized yet');
-        throw new Error('Authentication system is initializing. Please try again in a moment.'); 
+        throw new Error('Authentication not available on server side.'); 
       },
       register: async () => { 
-        console.warn('Auth system not initialized yet');
-        throw new Error('Authentication system is initializing. Please try again in a moment.'); 
+        throw new Error('Authentication not available on server side.'); 
       },
-      logout: async () => { 
-        console.warn('Auth system not initialized yet');
-      },
-      isLoading: true,
+      logout: async () => {},
+      isLoading: false,
     };
   }
   return context;

@@ -143,7 +143,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       if (isLogin) {
         if (!login) {
-          throw new Error("Authentication service is not available. Please refresh the page and try again.");
+          throw new Error("Authentication service is not available. Please wait a moment and try again.");
         }
         await login(data.email, data.password);
         toast({
@@ -153,7 +153,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         router.push("/dashboard");
       } else {
         if (!register) {
-          throw new Error("Registration service is not available. Please refresh the page and try again.");
+          throw new Error("Registration service is not available. Please wait a moment and try again.");
         }
         // Remove confirmPassword before sending to backend
         const { confirmPassword, ...registerData } = data as any;
@@ -166,11 +166,22 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
       form.reset();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
+      const errorMessage = error instanceof Error ? error.message : "An error occurred";
+      
+      // If it's an initialization error, suggest waiting and trying again
+      if (errorMessage.includes('initializing') || errorMessage.includes('not available')) {
+        toast({
+          title: "System Initializing",
+          description: "The authentication system is starting up. Please wait a few seconds and try again.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -189,7 +200,10 @@ export function AuthForm({ mode }: AuthFormProps) {
     return (
       <div className="space-y-4">
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Loading authentication service...</p>
+          <div className="animate-pulse">
+            <p className="text-muted-foreground">Initializing authentication...</p>
+            <p className="text-xs text-muted-foreground mt-2">This should only take a moment</p>
+          </div>
         </div>
       </div>
     );
