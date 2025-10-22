@@ -314,3 +314,45 @@
 - Rollback capability for each feature without impacting existing site
 - Separate database (Convex) ensures no data conflicts
 - Independent service dependencies (Sanity) for content management
+- [ ] 
+10. Fix authentication initialization and server-side errors (PRIORITY)
+
+  - [ ] 10.1 Restructure authentication provider hierarchy
+
+    - Move AuthProvider to always render inside ConvexProvider
+    - Remove conditional AuthProvider rendering in multiple locations
+    - Implement single provider pattern to eliminate race conditions
+    - Add proper loading screen while Convex client initializes
+    - _Requirements: 6.1, 6.2, 6.3_
+  
+  - [ ] 10.2 Fix React Rules of Hooks violations in auth context
+
+    - Remove conditional hook usage in try-catch blocks
+    - Create proper hook wrapper that safely manages Convex hooks
+    - Implement authentication service layer that doesn't depend on hooks directly
+    - Add proper error boundaries for authentication failures
+    - _Requirements: 6.5, 6.1_
+  
+  - [ ] 10.3 Add comprehensive data validation for content pages
+
+    - Add null safety checks for all Sanity data structures in announcement pages
+    - Implement data validation before component rendering
+    - Add type guards for complex data structures (categories, attachments, etc.)
+    - Create fallback content for missing or malformed data
+    - _Requirements: 7.2, 7.5_
+  
+  - [ ] 10.4 Implement React Error Boundaries for content rendering
+
+    - Add Error Boundaries to catch server-side rendering errors
+    - Implement graceful fallback UI for failed components
+    - Ensure navigation remains functional during errors
+    - Add error reporting and logging for debugging
+    - _Requirements: 7.4, 7.6_
+  
+  - [ ] 10.5 Verify fixes and test edge cases
+
+    - Test authentication without initialization errors
+    - Verify all announcement pages load without server-side exceptions
+    - Test with missing Sanity data and malformed content
+    - Ensure consistent behavior across different deployment environments
+    - _Requirements: 6.6, 7.6_

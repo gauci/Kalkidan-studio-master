@@ -9,27 +9,27 @@ import { useMemo, useState, useEffect } from 'react';
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <LanguageProvider>
-      <ConvexProviderWrapper>
+      <ConvexAuthWrapper>
         {children}
-      </ConvexProviderWrapper>
+      </ConvexAuthWrapper>
     </LanguageProvider>
   );
 }
 
-function ConvexProviderWrapper({ children }: { children: React.ReactNode }) {
-  const [isClient, setIsClient] = useState(false);
+function ConvexAuthWrapper({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
   
   const convexClient = useMemo(() => {
-    if (!isClient) return null;
+    if (!mounted) return null;
     
     const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
     
     if (!convexUrl) {
-      console.warn("NEXT_PUBLIC_CONVEX_URL is not set, CMS features will be disabled");
+      console.warn("NEXT_PUBLIC_CONVEX_URL is not set");
       return null;
     }
 
@@ -39,33 +39,51 @@ function ConvexProviderWrapper({ children }: { children: React.ReactNode }) {
       console.error("Failed to create Convex client:", error);
       return null;
     }
-  }, [isClient]);
+  }, [mounted]);
 
-  // Always provide AuthProvider, but with different Convex availability
-  if (!isClient) {
-    // Server-side: provide auth context without Convex
+  // Don't render anything until mounted (prevents hydration issues)
+  if (!mounted) {
+    return null;
+  }
+
+  // If we have a Convex client, use it with auth
+  if (convexClient) {
     return (
-      <AuthProvider>
-        {children}
-      </AuthProvider>
+      <ConvexProvider client={convexClient}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </ConvexProvider>
     );
   }
 
-  if (!convexClient) {
-    // Client-side but no Convex: provide auth context without Convex
-    return (
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    );
-  }
-
-  // Client-side with Convex: provide full functionality
+  // No Convex client - render without auth features
   return (
-    <ConvexProvider client={convexClient}>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </ConvexProvider>
+    <NoAuthProvider>
+      {children}
+    </NoAuthProvider>
+  );
+}
+
+// Simple fallback provider when Convex is not available
+function NoAuthProvider({ children }: { children: React.ReactNode }) {
+  const authValue = {
+    user: null,
+    token: null,
+    login: async () => {
+      throw new Error('Authentication service is not available. Please check your configuration.');
+    },
+    register: async () => {
+      throw new Error('Registration service is not available. Please check your configuration.');
+    },
+    logout: async () => {},
+    isLoading: false,
+  };
+
+  return (
+    <div>
+      {/* Provide a minimal auth context for components that need it */}
+      {children}
+    </div>
   );
 }

@@ -52,13 +52,44 @@ export async function generateMetadata({ params }: AnnouncementPageProps) {
   }
 }
 
+// Helper function to validate announcement data
+function validateAnnouncementData(announcement: any) {
+  if (!announcement) return false;
+  
+  // Check required fields
+  if (!announcement.title || typeof announcement.title !== 'string') return false;
+  if (!announcement._updatedAt) return false;
+  
+  // Validate optional fields that are used in rendering
+  if (announcement.categories && !Array.isArray(announcement.categories)) {
+    announcement.categories = [];
+  }
+  
+  if (announcement.attachments && !Array.isArray(announcement.attachments)) {
+    announcement.attachments = [];
+  }
+  
+  if (announcement.targetAudience && !Array.isArray(announcement.targetAudience)) {
+    announcement.targetAudience = [];
+  }
+  
+  // Ensure priority has a default value
+  if (!announcement.priority || typeof announcement.priority !== 'string') {
+    announcement.priority = 'normal';
+  }
+  
+  return true;
+}
+
 export default async function AnnouncementPage({ params }: AnnouncementPageProps) {
   try {
-    const announcement = await getAnnouncementBySlug(params.slug)
+    const rawAnnouncement = await getAnnouncementBySlug(params.slug)
 
-    if (!announcement) {
+    if (!rawAnnouncement || !validateAnnouncementData(rawAnnouncement)) {
       notFound()
     }
+    
+    const announcement = rawAnnouncement;
 
   const priorityColors = {
     urgent: 'destructive',
@@ -145,7 +176,7 @@ export default async function AnnouncementPage({ params }: AnnouncementPageProps
           </div>
 
           {/* Target Audience */}
-          {announcement.targetAudience && announcement.targetAudience.length > 0 && (
+          {announcement.targetAudience && Array.isArray(announcement.targetAudience) && announcement.targetAudience.length > 0 && (
             <Card className="bg-muted/50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center">
@@ -155,13 +186,13 @@ export default async function AnnouncementPage({ params }: AnnouncementPageProps
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-2">
-                  {announcement.targetAudience.map((audience: string) => (
-                    <Badge key={audience} variant="outline">
+                  {announcement.targetAudience.map((audience: string, index: number) => (
+                    <Badge key={audience || index} variant="outline">
                       {audience === 'all' ? 'All Members' : 
                        audience === 'board' ? 'Board Members' :
                        audience === 'committee' ? 'Committee Members' :
                        audience === 'volunteers' ? 'Volunteers' :
-                       audience === 'donors' ? 'Donors' : audience}
+                       audience === 'donors' ? 'Donors' : (audience || 'Unknown')}
                     </Badge>
                   ))}
                 </div>
@@ -176,7 +207,7 @@ export default async function AnnouncementPage({ params }: AnnouncementPageProps
         </article>
 
         {/* Attachments */}
-        {announcement.attachments && announcement.attachments.length > 0 && (
+        {announcement.attachments && Array.isArray(announcement.attachments) && announcement.attachments.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -189,8 +220,8 @@ export default async function AnnouncementPage({ params }: AnnouncementPageProps
                 {announcement.attachments.map((attachment: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">{attachment.title || `Attachment ${index + 1}`}</h4>
-                      {attachment.description && (
+                      <h4 className="font-medium">{attachment?.title || `Attachment ${index + 1}`}</h4>
+                      {attachment?.description && (
                         <p className="text-sm text-muted-foreground">{attachment.description}</p>
                       )}
                     </div>

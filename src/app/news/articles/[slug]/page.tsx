@@ -123,11 +123,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
 
           {/* Categories */}
-          {article.categories && article.categories.length > 0 && (
+          {article.categories && Array.isArray(article.categories) && article.categories.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {article.categories.map((category: any) => (
-                <Badge key={category.slug.current} variant="secondary">
-                  {category.title}
+              {article.categories.map((category: any, index: number) => (
+                <Badge key={category?.slug?.current || index} variant="secondary">
+                  {category?.title || 'Category'}
                 </Badge>
               ))}
             </div>

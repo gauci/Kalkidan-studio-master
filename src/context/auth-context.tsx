@@ -37,60 +37,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isConvexReady, setIsConvexReady] = useState(false);
 
-  // Check if we're in a Convex provider context
-  useEffect(() => {
-    // Check if Convex is available immediately, then set a shorter fallback
-    const checkConvex = () => {
-      try {
-        // Try to access Convex API to see if it's available
-        if (typeof api !== 'undefined') {
-          setIsConvexReady(true);
-          return;
-        }
-      } catch (error) {
-        // Convex not ready yet
-      }
-      
-      // Fallback timer with shorter delay
-      const timer = setTimeout(() => {
-        setIsConvexReady(true);
-      }, 50);
-      return timer;
-    };
-
-    const timer = checkConvex();
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
-
-  // Only use Convex hooks when ready and available
-  let loginMutation, registerMutation, logoutMutation, currentUser;
-  let isInConvexProvider = false;
-  
-  try {
-    // Check if we're inside a ConvexProvider by trying to use a hook
-    const testHook = useMutation;
-    isInConvexProvider = true;
-    
-    loginMutation = isConvexReady ? useMutation(api.auth.loginUser) : null;
-    registerMutation = isConvexReady ? useMutation(api.auth.registerUser) : null;
-    logoutMutation = isConvexReady ? useMutation(api.auth.logoutUser) : null;
-    
-    // Verify session on mount (only when Convex is ready)
-    currentUser = isConvexReady && sessionToken 
-      ? useQuery(api.auth.getCurrentUser, { token: sessionToken })
-      : undefined;
-  } catch (error) {
-    // Not in ConvexProvider or Convex not available
-    isInConvexProvider = false;
-    loginMutation = null;
-    registerMutation = null;
-    logoutMutation = null;
-    currentUser = undefined;
-  }
+  // These hooks will only be called when we're inside a ConvexProvider
+  const loginMutation = useMutation(api.auth.loginUser);
+  const registerMutation = useMutation(api.auth.registerUser);
+  const logoutMutation = useMutation(api.auth.logoutUser);
+  const currentUser = useQuery(
+    api.auth.getCurrentUser, 
+    sessionToken ? { token: sessionToken } : 'skip'
+  );
 
   useEffect(() => {
     // Check for existing session token (only on client side)
@@ -107,19 +62,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Check for existing session token on mount
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('sessionToken');
+      if (token) {
+        setSessionToken(token);
+      } else {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
     if (currentUser !== undefined) {
       setUser(currentUser);
       setIsLoading(false);
-    } else if (isConvexReady && !sessionToken) {
-      // If Convex is ready but no session token, stop loading
+    } else if (!sessionToken) {
       setIsLoading(false);
     }
-  }, [currentUser, isConvexReady, sessionToken]);
+  }, [currentUser, sessionToken]);
 
   const login = async (email: string, password: string) => {
-    if (!loginMutation || !isConvexReady) {
-      throw new Error('Authentication service not available. Please try again in a moment.');
-    }
     try {
       const result = await loginMutation({ email, password });
       setSessionToken(result.sessionToken);
@@ -134,9 +99,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
-    if (!registerMutation || !isConvexReady) {
-      throw new Error('Registration service not available. Please try again in a moment.');
-    }
     try {
       const result = await registerMutation(data);
       return result;
@@ -172,34 +134,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    // Check if we're on the client side and wait a bit longer
-    if (typeof window !== 'undefined') {
-      // Return a more user-friendly loading state
-      return {
-        user: null,
-        token: null,
-        login: async () => { 
-          throw new Error('Please wait a moment for the system to initialize, then try again.'); 
-        },
-        register: async () => { 
-          throw new Error('Please wait a moment for the system to initialize, then try again.'); 
-        },
-        logout: async () => { 
-          console.warn('Auth system not ready yet');
-        },
-        isLoading: true,
-      };
-    }
-    
-    // Server-side fallback
+    // Return a safe fallback when context is not available
     return {
       user: null,
       token: null,
       login: async () => { 
-        throw new Error('Authentication not available on server side.'); 
+        throw new Error('Authentication service is not available. Please refresh the page.'); 
       },
       register: async () => { 
-        throw new Error('Authentication not available on server side.'); 
+        throw new Error('Authentication service is not available. Please refresh the page.'); 
       },
       logout: async () => {},
       isLoading: false,
