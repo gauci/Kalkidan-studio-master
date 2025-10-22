@@ -3,7 +3,7 @@
 
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { LanguageProvider } from '@/context/language-context';
-import { AuthProvider } from '@/context/auth-context';
+import { AuthProvider, AuthContext } from '@/context/auth-context';
 import { useMemo, useState, useEffect } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -57,7 +57,7 @@ function ConvexAuthWrapper({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // No Convex client - render without auth features
+  // No Convex client - render with fallback auth context
   return (
     <NoAuthProvider>
       {children}
@@ -71,19 +71,26 @@ function NoAuthProvider({ children }: { children: React.ReactNode }) {
     user: null,
     token: null,
     login: async () => {
-      throw new Error('Authentication service is not available. Please check your configuration.');
+      throw new Error('Authentication service is not configured. Please set NEXT_PUBLIC_CONVEX_URL in your environment variables.');
     },
     register: async () => {
-      throw new Error('Registration service is not available. Please check your configuration.');
+      throw new Error('Registration service is not configured. Please set NEXT_PUBLIC_CONVEX_URL in your environment variables.');
     },
     logout: async () => {},
     isLoading: false,
   };
 
+  // Show a configuration notice in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️  NEXT_PUBLIC_CONVEX_URL is not set. Authentication features will be disabled.');
+      console.warn('💡 To enable authentication, set NEXT_PUBLIC_CONVEX_URL in your .env.local file');
+    }
+  }, []);
+
   return (
-    <div>
-      {/* Provide a minimal auth context for components that need it */}
+    <AuthContext.Provider value={authValue}>
       {children}
-    </div>
+    </AuthContext.Provider>
   );
 }

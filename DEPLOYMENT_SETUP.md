@@ -21,13 +21,27 @@ NEXT_PUBLIC_REVALIDATE_SECRET=your-revalidate-secret
 ### Vercel Deployment
 
 1. **Set Environment Variables in Vercel Dashboard:**
-   - Go to your project settings
-   - Add all required environment variables
-   - Ensure `NEXT_PUBLIC_CONVEX_URL` is set correctly
+   - Go to your Vercel project settings
+   - Navigate to "Environment Variables" section
+   - Add the following required variables:
+
+   ```bash
+   # Required for authentication to work
+   NEXT_PUBLIC_CONVEX_URL=https://amiable-crocodile-485.convex.cloud
+   
+   # Required for content management
+   NEXT_PUBLIC_SANITY_PROJECT_ID=w0wnv9ta
+   NEXT_PUBLIC_SANITY_DATASET=production
+   ```
 
 2. **Deploy from GitHub:**
    - Connect your GitHub repository
    - Vercel will automatically deploy on push to master
+   - After adding environment variables, trigger a new deployment
+
+3. **Verify Deployment:**
+   - Check that authentication pages load without "system initializing" errors
+   - Verify that announcement pages don't show server-side exceptions
 
 ### Build Troubleshooting
 
