@@ -539,8 +539,8 @@ export const toggleUserStatus = mutation({
     };
   },
 });
-// 
-Promote user to admin (for bootstrapping)
+
+// Promote user to admin (for bootstrapping)
 export const promoteToAdmin = mutation({
   args: {
     email: v.string(),

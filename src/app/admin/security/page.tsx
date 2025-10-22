@@ -1,9 +1,14 @@
-import SecurityMonitoring from '@/components/admin/security-monitoring';
+import { SecurityDashboard } from '@/components/admin/security-dashboard';
 
-export default function AdminSecurityPage() {
+export default function SecurityPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <SecurityMonitoring />
+    <div className="container mx-auto py-6">
+      <SecurityDashboard />
     </div>
   );
 }
+
+export const metadata = {
+  title: 'Security Monitoring - Admin',
+  description: 'Monitor security events and authentication attempts',
+};

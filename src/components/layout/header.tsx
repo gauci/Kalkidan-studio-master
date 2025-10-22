@@ -4,12 +4,18 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, HandHelping } from "lucide-react";
+import { Menu, HandHelping, User, LogOut } from "lucide-react";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { useLanguage } from "@/context/language-context";
+import { useAuthSafe } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
   const { translations } = useLanguage();
+  const { user, logout } = useAuthSafe();
+  const router = useRouter();
+  const { toast } = useToast();
   
   const navLinks = [
     { href: "/", label: translations.header.home },
@@ -18,6 +24,25 @@ export function Header() {
     { href: "/profile", label: translations.header.profile },
     { href: "/contact", label: translations.header.contact },
   ];
+
+  const handleLogout = async () => {
+    try {
+      if (logout) {
+        await logout();
+      }
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      router.push('/');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-primary text-primary-foreground shadow-sm">
@@ -43,9 +68,33 @@ export function Header() {
 
         <div className="hidden md:flex items-center gap-2">
           <LanguageSwitcher />
-          <Button asChild variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
-            <Link href="/login">{translations.header.login}</Link>
-          </Button>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Button asChild variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                <Link href="/dashboard">
+                  <User className="h-4 w-4 mr-2" />
+                  {user.name}
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button asChild variant="outline" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                <Link href="/auth/register">Register</Link>
+              </Button>
+              <Button asChild variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                <Link href="/auth/login">{translations.header.login}</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="md:hidden">
@@ -76,12 +125,36 @@ export function Header() {
                   ))}
                 </nav>
                 <div className="mt-auto flex flex-col gap-4">
-                   <Button asChild variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                     <Link href="/login">{translations.header.login}</Link>
-                   </Button>
-                   <div className="self-center">
+                  {user ? (
+                    <div className="flex flex-col gap-2">
+                      <Button asChild variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                        <Link href="/dashboard">
+                          <User className="h-4 w-4 mr-2" />
+                          {user.name}
+                        </Link>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={handleLogout}
+                        className="text-primary-foreground border-primary-foreground"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Button asChild variant="outline" className="text-primary-foreground border-primary-foreground">
+                        <Link href="/auth/register">Register</Link>
+                      </Button>
+                      <Button asChild variant="secondary" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                        <Link href="/auth/login">{translations.header.login}</Link>
+                      </Button>
+                    </div>
+                  )}
+                  <div className="self-center">
                     <LanguageSwitcher />
-                   </div>
+                  </div>
                 </div>
               </div>
             </SheetContent>
