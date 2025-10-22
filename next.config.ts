@@ -75,11 +75,7 @@ const nextConfig: NextConfig = {
   // Redirects for security
   async redirects() {
     return [
-      {
-        source: '/admin',
-        destination: '/admin/dashboard',
-        permanent: false,
-      },
+      // Remove the problematic redirect - /admin should go to the admin page directly
     ];
   },
 
