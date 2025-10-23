@@ -12,9 +12,9 @@ export default function AuthLoginPage() {
       <div className="relative z-10 w-full max-w-md p-4">
         <Card className="border-primary shadow-2xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-headline">CMS Login</CardTitle>
+            <CardTitle className="text-3xl font-headline">Kalkidan Member Login</CardTitle>
             <CardDescription>
-              Access your dashboard and file management tools.
+              Welcome to the Kalkidan community platform. Please log in to access your member dashboard.
             </CardDescription>
           </CardHeader>
           <CardContent>

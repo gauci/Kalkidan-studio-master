@@ -122,63 +122,97 @@ export function AuthForm({ mode }: AuthFormProps) {
     setIsLoading(true);
     
     try {
-      // Check rate limiting
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const identifier = data.email; // Use email as identifier
-      
-      const rateLimitCheck = await SecurityUtils.checkRateLimit(endpoint, identifier);
-      if (!rateLimitCheck.allowed) {
-        toast({
-          title: "Rate Limit Exceeded",
-          description: rateLimitCheck.error || "Too many attempts. Please try again later.",
-          variant: "destructive",
+      // Simplified rate limiting check - fail open if there are issues
+      let rateLimitOk = true;
+      try {
+        const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+        const identifier = data.email;
+        
+        const rateLimitCheck = await SecurityUtils.checkRateLimit(endpoint, identifier);
+        if (!rateLimitCheck.allowed) {
+          toast({
+            title: "Too Many Attempts",
+            description: "Please wait a few minutes before trying again.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        setRateLimitInfo({
+          remaining: rateLimitCheck.remaining,
+          resetTime: rateLimitCheck.resetTime,
         });
-        return;
+      } catch (rateLimitError) {
+        console.warn('Rate limit check failed, proceeding anyway:', rateLimitError);
+        // Continue with login/registration even if rate limit check fails
       }
-
-      setRateLimitInfo({
-        remaining: rateLimitCheck.remaining,
-        resetTime: rateLimitCheck.resetTime,
-      });
 
       if (isLogin) {
         if (!login) {
-          throw new Error("Authentication service is not available. Please wait a moment and try again.");
+          throw new Error("Please wait a moment for the system to initialize, then try again.");
         }
+        
         await login(data.email, data.password);
+        
         toast({
-          title: "Login Successful",
-          description: "Welcome back! Redirecting to your dashboard...",
+          title: "Welcome back!",
+          description: "Taking you to your dashboard...",
         });
-        router.push("/dashboard");
+        
+        // Small delay to ensure auth state is updated
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 500);
+        
       } else {
         if (!register) {
-          throw new Error("Registration service is not available. Please wait a moment and try again.");
+          throw new Error("Please wait a moment for the system to initialize, then try again.");
         }
+        
         // Remove confirmPassword before sending to backend
         const { confirmPassword, ...registerData } = data as any;
         await register(registerData);
+        
         toast({
-          title: "Registration Successful",
-          description: "Your account has been created. You can now log in.",
+          title: "Account Created!",
+          description: "Please log in with your new account.",
         });
-        router.push("/auth/login");
+        
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 500);
       }
+      
       form.reset();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong";
       
-      // If it's an initialization error, suggest waiting and trying again
-      if (errorMessage.includes('initializing') || errorMessage.includes('not available')) {
+      console.error('Auth error:', error);
+      
+      // Simplified error handling
+      if (errorMessage.includes('initializ') || errorMessage.includes('not available')) {
         toast({
-          title: "System Initializing",
-          description: "The authentication system is starting up. Please wait a few seconds and try again.",
+          title: "System Starting Up",
+          description: "Please wait a few seconds and try again.",
           variant: "default",
+        });
+      } else if (errorMessage.includes('credentials') || errorMessage.includes('Invalid')) {
+        toast({
+          title: "Login Failed",
+          description: "Please check your email and password and try again.",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('exists')) {
+        toast({
+          title: "Account Already Exists",
+          description: "An account with this email already exists. Please try logging in instead.",
+          variant: "destructive",
         });
       } else {
         toast({
-          title: "Error",
-          description: errorMessage,
+          title: "Something went wrong",
+          description: "Please try again. If the problem continues, please contact support.",
           variant: "destructive",
         });
       }

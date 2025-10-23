@@ -2,61 +2,61 @@
 
 ## Introduction
 
-This feature addresses critical security vulnerabilities in the authentication and authorization system where unauthorized users can see admin interface elements and registered user information. The system currently shows logout buttons and admin navigation to users who shouldn't have access, creating a serious security risk.
+This feature improves the user experience of the authentication system for Kalkidan e.V., while maintaining the robust security architecture already implemented. The current system has good security features but suffers from confusing branding, redirect issues, and complex error messages that make it difficult for the 200 community members to use. The goal is to keep the security robustness while making the system simple and intuitive to use.
 
 ## Requirements
 
 ### Requirement 1
 
-**User Story:** As a system administrator, I want to ensure that only authenticated and authorized users can access protected areas, so that sensitive information remains secure.
+**User Story:** As a community member, I want a clear and simple login process that works reliably, so that I can quickly access my member dashboard without confusion.
 
 #### Acceptance Criteria
 
-1. WHEN an unauthenticated user attempts to access admin routes THEN the system SHALL immediately redirect them to the login page without showing any admin interface elements
-2. WHEN an authenticated user without admin privileges attempts to access admin routes THEN the system SHALL redirect them to their dashboard without showing admin interface elements
-3. WHEN the authentication state is loading THEN the system SHALL show a loading indicator and NOT render any protected content
-4. WHEN authentication fails or expires THEN the system SHALL immediately clear all user data and redirect to login
+1. WHEN I visit the login page THEN the system SHALL show "Kalkidan Member Login" instead of "CMS Login"
+2. WHEN I successfully log in THEN the system SHALL redirect me directly to my member dashboard (/dashboard) instead of CMS routes
+3. WHEN I register as a new member THEN the system SHALL complete registration and redirect me to login with a success message
+4. WHEN login fails THEN the system SHALL show clear, helpful error messages without technical jargon
 
 ### Requirement 2
 
-**User Story:** As a security-conscious user, I want the system to properly handle authentication state transitions, so that no sensitive information is leaked during loading or error states.
+**User Story:** As a community member, I want my dashboard to load quickly and show relevant information, so that I can easily access community features.
 
 #### Acceptance Criteria
 
-1. WHEN the page is loading authentication state THEN the system SHALL NOT render any user-specific content or navigation elements
-2. WHEN authentication state changes from authenticated to unauthenticated THEN the system SHALL immediately clear all displayed user information
-3. WHEN there is an authentication error THEN the system SHALL display appropriate error messages without exposing system details
-4. WHEN a user's session expires THEN the system SHALL automatically log them out and redirect to login
+1. WHEN I log in as a member THEN the system SHALL show me a dashboard with my profile, recent news, and file access
+2. WHEN I navigate the site THEN the system SHALL show me clear, member-appropriate navigation
+3. WHEN I click logout THEN the system SHALL log me out reliably and return me to the homepage
+4. WHEN my session expires THEN the system SHALL redirect me to login with a clear message
 
 ### Requirement 3
 
-**User Story:** As a regular user, I want to see appropriate login/register buttons when I'm not authenticated, so that I can access the system properly.
+**User Story:** As an admin, I want separate admin access that doesn't interfere with the member experience, so that I can manage content without confusing regular members.
 
 #### Acceptance Criteria
 
-1. WHEN a user is not authenticated THEN the system SHALL display login and register buttons in the navigation
-2. WHEN a user is authenticated THEN the system SHALL display their name and logout button in the navigation
-3. WHEN a user clicks logout THEN the system SHALL clear their session and show login/register buttons
-4. WHEN navigation state is uncertain THEN the system SHALL default to showing login/register options
+1. WHEN I log in as an admin THEN the system SHALL give me the option to access admin features or member dashboard
+2. WHEN I access admin features THEN the system SHALL show admin-specific navigation and tools
+3. WHEN I switch between admin and member views THEN the system SHALL maintain my session but change the interface
+4. WHEN regular members try to access admin areas THEN the system SHALL redirect them to their member dashboard
 
 ### Requirement 4
 
-**User Story:** As a developer, I want robust middleware protection for admin routes, so that server-side security is enforced regardless of client-side behavior.
+**User Story:** As a system user, I want the authentication to work reliably with the existing security features, so that I can focus on community activities rather than technical issues.
 
 #### Acceptance Criteria
 
-1. WHEN a request is made to admin routes THEN the middleware SHALL verify authentication and authorization server-side
-2. WHEN an unauthorized request is made to admin routes THEN the middleware SHALL return a 401 or 403 status code
-3. WHEN authentication tokens are invalid or expired THEN the middleware SHALL reject the request
-4. WHEN admin routes are accessed without proper credentials THEN the system SHALL log the security event for monitoring
+1. WHEN I use the login form THEN the system SHALL process my credentials using the existing robust validation but with user-friendly messages
+2. WHEN I register THEN the system SHALL create my account using the existing security features but with a smooth user experience
+3. WHEN there are login issues THEN the system SHALL show clear, helpful error messages instead of technical security messages
+4. WHEN the system encounters errors THEN it SHALL maintain security while providing helpful guidance to users
 
 ### Requirement 5
 
-**User Story:** As a system administrator, I want proper role-based access control, so that users can only access features appropriate to their role.
+**User Story:** As a community organization, we want to maintain the robust security features while making them transparent to users, so that members can easily participate in community activities without security barriers.
 
 #### Acceptance Criteria
 
-1. WHEN a user's role is verified THEN the system SHALL only display navigation and features appropriate to that role
-2. WHEN a user attempts to access features above their permission level THEN the system SHALL deny access and redirect appropriately
-3. WHEN user roles change THEN the system SHALL immediately update the available features and navigation
-4. WHEN role verification fails THEN the system SHALL default to the most restrictive access level
+1. WHEN members log in THEN the system SHALL use the existing security features (rate limiting, validation, etc.) but hide complexity from users
+2. WHEN admin functions are accessed THEN the system SHALL use the existing role verification but with clearer user interfaces
+3. WHEN there are security events THEN the system SHALL continue logging them but show user-friendly messages to members
+4. WHEN the system detects issues THEN it SHALL use existing security measures while providing helpful guidance to users

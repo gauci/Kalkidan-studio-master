@@ -12,9 +12,9 @@ export default function AuthRegisterPage() {
       <div className="relative z-10 w-full max-w-md p-4">
         <Card className="border-primary shadow-2xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-headline">Create CMS Account</CardTitle>
+            <CardTitle className="text-3xl font-headline">Join Kalkidan Community</CardTitle>
             <CardDescription>
-              Join the content management system to upload files and access resources.
+              Create your member account to access community news, files, and connect with other members.
             </CardDescription>
           </CardHeader>
           <CardContent>
