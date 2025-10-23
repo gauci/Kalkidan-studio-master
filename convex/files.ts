@@ -17,15 +17,15 @@ function validateFile(fileName: string, fileType: string, fileSize: number) {
     ...ALLOWED_FILE_TYPES.ARCHIVES
   ];
   
-  if (!allAllowedTypes.includes(fileType)) {
+  if (!allAllowedTypes.includes(fileType as any)) {
     throw new Error(`File type ${fileType} is not allowed for security reasons`);
   }
 
   // Check file size based on type
   let maxSize = MAX_FILE_SIZES.DOCUMENT; // Default
-  if (ALLOWED_FILE_TYPES.IMAGES.includes(fileType)) {
+  if (ALLOWED_FILE_TYPES.IMAGES.includes(fileType as any)) {
     maxSize = MAX_FILE_SIZES.IMAGE;
-  } else if (ALLOWED_FILE_TYPES.ARCHIVES.includes(fileType)) {
+  } else if (ALLOWED_FILE_TYPES.ARCHIVES.includes(fileType as any)) {
     maxSize = MAX_FILE_SIZES.ARCHIVE;
   }
 
