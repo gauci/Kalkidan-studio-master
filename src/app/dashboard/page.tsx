@@ -19,16 +19,7 @@ export default function DashboardPage() {
     setIsClient(true);
   }, []);
 
-  // Safely get auth context
-  let authContext;
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    // Auth context not available during SSR
-    authContext = null;
-  }
-  
-  const { user, logout } = authContext || { user: null, logout: null };
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     if (!logout) {
@@ -147,9 +138,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <UserProfileCard />
-        
+      <div className="grid gap-6 md:grid-cols-1">
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
