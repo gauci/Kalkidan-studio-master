@@ -34,7 +34,8 @@
     - Improve user feedback during registration process
     - _Requirements: 1.3_
   
-  - [x] 2.2 Enhance loading states and user feedback
+  - [ ] 2.2 Enhance loading states and user feedback
+
 
     - Improve loading indicators during authentication
     - Keep existing security checks but make them transparent

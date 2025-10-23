@@ -170,7 +170,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = () => {
       if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('sessionToken');
+        // Check localStorage first, then cookies as fallback
+        let token = localStorage.getItem('sessionToken');
+        
+        // If no token in localStorage, check cookies
+        if (!token) {
+          const cookies = document.cookie.split(';');
+          const sessionCookie = cookies.find(cookie => cookie.trim().startsWith('sessionToken='));
+          if (sessionCookie) {
+            token = sessionCookie.split('=')[1];
+            // Store in localStorage for consistency
+            localStorage.setItem('sessionToken', token);
+          }
+        }
+        
         if (token) {
           updateAuthState({
             status: 'loading',
@@ -269,6 +282,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (typeof window !== 'undefined') {
         localStorage.setItem('sessionToken', result.sessionToken);
+        // Also set as cookie for middleware
+        document.cookie = `sessionToken=${result.sessionToken}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -310,10 +325,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       error: null
     });
     
-    // Clear localStorage
+    // Clear localStorage and cookies
     if (typeof window !== 'undefined') {
       localStorage.removeItem('sessionToken');
       sessionStorage.clear();
+      // Clear the session cookie
+      document.cookie = 'sessionToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
     
     // Try to logout on server (don't wait for it)

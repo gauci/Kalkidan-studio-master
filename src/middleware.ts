@@ -68,7 +68,7 @@ async function validateSessionToken(token: string, request: NextRequest): Promis
 const rateLimitStore = new Map<string, { count: number; resetTime: number; blocked: boolean }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_MINUTE = 60;
-const MAX_AUTH_FAILURES_PER_MINUTE = 5;
+const MAX_AUTH_FAILURES_PER_MINUTE = 20; // Increased from 5 to 20 to be less aggressive
 
 // Suspicious activity tracking
 const suspiciousActivity = new Map<string, {
@@ -222,6 +222,9 @@ export async function middleware(request: NextRequest) {
       // Get session token from cookie or header
       const sessionToken = request.cookies.get('sessionToken')?.value || 
                            request.headers.get('authorization')?.replace('Bearer ', '');
+      
+      // Debug logging
+      console.log(`[Middleware] Path: ${pathname}, Token found: ${!!sessionToken}, Token length: ${sessionToken?.length || 0}`);
       
       if (!sessionToken) {
         // Check auth failure rate limiting
