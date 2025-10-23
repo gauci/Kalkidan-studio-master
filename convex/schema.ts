@@ -39,7 +39,7 @@ export default defineSchema({
 
   auditLogs: defineTable({
     userId: v.id("users"),
-    fileId: v.id("files"),
+    fileId: v.optional(v.id("files")),
     action: v.union(
       v.literal("upload"),
       v.literal("download"),

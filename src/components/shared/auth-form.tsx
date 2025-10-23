@@ -122,38 +122,19 @@ export function AuthForm({ mode }: AuthFormProps) {
     setIsLoading(true);
     
     try {
-      // Simplified rate limiting check - fail open if there are issues
-      let rateLimitOk = true;
-      try {
-        const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-        const identifier = data.email;
-        
-        const rateLimitCheck = await SecurityUtils.checkRateLimit(endpoint, identifier);
-        if (!rateLimitCheck.allowed) {
-          toast({
-            title: "Too Many Attempts",
-            description: "Please wait a few minutes before trying again.",
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return;
-        }
-        
-        setRateLimitInfo({
-          remaining: rateLimitCheck.remaining,
-          resetTime: rateLimitCheck.resetTime,
-        });
-      } catch (rateLimitError) {
-        console.warn('Rate limit check failed, proceeding anyway:', rateLimitError);
-        // Continue with login/registration even if rate limit check fails
-      }
+      // Temporarily disable rate limiting check to isolate the error
+      console.log('Skipping rate limit check for debugging');
 
       if (isLogin) {
+        console.log('Starting login process...');
         if (!login) {
+          console.error('Login function not available');
           throw new Error("Please wait a moment for the system to initialize, then try again.");
         }
         
+        console.log('Calling login function...');
         await login(data.email, data.password);
+        console.log('Login function completed successfully');
         
         toast({
           title: "Welcome back!",
@@ -188,7 +169,11 @@ export function AuthForm({ mode }: AuthFormProps) {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Something went wrong";
       
-      console.error('Auth error:', error);
+      console.error('Auth error details:', {
+        error,
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
       
       // Simplified error handling
       if (errorMessage.includes('initializ') || errorMessage.includes('not available')) {
@@ -210,11 +195,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Something went wrong",
-          description: "Please try again. If the problem continues, please contact support.",
-          variant: "destructive",
-        });
+        // Show error in console and alert for debugging
+        console.error('Unhandled auth error:', errorMessage);
+        alert(`Authentication Error: ${errorMessage}`);
       }
     } finally {
       setIsLoading(false);

@@ -117,7 +117,7 @@ export const loginUser = mutation({
       if (user) {
         await ctx.db.insert("auditLogs", {
           userId: user._id,
-          fileId: user._id as any, // Using user ID as placeholder
+          // No fileId needed for login events
           action: "view", // Login attempt
           success: false,
           timestamp: Date.now(),
@@ -134,7 +134,7 @@ export const loginUser = mutation({
       // Log failed login attempt
       await ctx.db.insert("auditLogs", {
         userId: user._id,
-        fileId: user._id as any, // Using user ID as placeholder
+        // No fileId needed for login events
         action: "view", // Login attempt
         success: false,
         timestamp: Date.now(),
@@ -177,7 +177,7 @@ export const loginUser = mutation({
     // Log successful login
     await ctx.db.insert("auditLogs", {
       userId: user._id,
-      fileId: user._id as any, // Using user ID as placeholder
+      // No fileId needed for login events
       action: "view", // Login attempt
       success: true,
       timestamp: Date.now(),

@@ -27,8 +27,7 @@ const publicRoutes = [
   '/auth/register',
   '/news',
   '/privacy-policy',
-  '/setup',
-  '/dashboard' // Temporarily make dashboard public for testing
+  '/setup'
 ];
 
 const authRoutes = [
