@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { ProtectedRoute } from '@/components/shared/protected-route';
+import { SimpleProtectedRoute } from '@/components/shared/simple-protected-route';
 
 export const metadata: Metadata = {
   title: 'Dashboard - Kalkidan CMS',
@@ -12,12 +12,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ProtectedRoute>
+    <SimpleProtectedRoute>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto py-8">
           {children}
         </div>
       </div>
-    </ProtectedRoute>
+    </SimpleProtectedRoute>
   );
 }

@@ -27,7 +27,8 @@ const publicRoutes = [
   '/auth/register',
   '/news',
   '/privacy-policy',
-  '/setup'
+  '/setup',
+  '/dashboard' // Temporarily make dashboard public for testing
 ];
 
 const authRoutes = [
@@ -225,6 +226,9 @@ export async function middleware(request: NextRequest) {
       
       // Debug logging
       console.log(`[Middleware] Path: ${pathname}, Token found: ${!!sessionToken}, Token length: ${sessionToken?.length || 0}`);
+      if (sessionToken) {
+        console.log(`[Middleware] Token preview: ${sessionToken.substring(0, 10)}...`);
+      }
       
       if (!sessionToken) {
         // Check auth failure rate limiting

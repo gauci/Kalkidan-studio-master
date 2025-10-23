@@ -281,9 +281,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (typeof window !== 'undefined') {
+        console.log('🔐 Storing session token:', result.sessionToken.substring(0, 10) + '...');
         localStorage.setItem('sessionToken', result.sessionToken);
         // Also set as cookie for middleware
         document.cookie = `sessionToken=${result.sessionToken}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
+        console.log('✅ Token stored in localStorage and cookie');
       }
     } catch (error) {
       console.error('Login error:', error);
