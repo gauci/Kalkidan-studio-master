@@ -143,7 +143,7 @@ export const createFileRecord = mutation({
       // Log failed upload
       await ctx.db.insert("auditLogs", {
         userId: session.userId,
-        fileId: session.userId as any, // Placeholder
+        // No fileId for failed uploads
         action: "upload",
         success: false,
         timestamp: Date.now(),

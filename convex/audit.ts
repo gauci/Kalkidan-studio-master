@@ -122,7 +122,7 @@ export const getUserAuditLogsAdmin = query({
     // Get file details for each log
     const logsWithDetails = await Promise.all(
       logs.map(async (log) => {
-        const file = await ctx.db.get(log.fileId);
+        const file = log.fileId ? await ctx.db.get(log.fileId) : null;
         const user = await ctx.db.get(log.userId);
         return {
           ...log,

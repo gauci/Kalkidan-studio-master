@@ -157,7 +157,7 @@ export const requestAccountDeletion = mutation({
     // Log the deletion request
     await ctx.db.insert("auditLogs", {
       userId: session.userId,
-      fileId: session.userId as any, // Using user ID as placeholder
+      // No fileId for privacy operations
       action: "delete",
       success: true,
       timestamp: Date.now(),
@@ -249,7 +249,7 @@ export const permanentlyDeleteUser = mutation({
     // Log the permanent deletion
     await ctx.db.insert("auditLogs", {
       userId: session.userId, // Admin who performed the deletion
-      fileId: session.userId as any,
+      // No fileId for user deletion operations
       action: "delete",
       success: true,
       timestamp: Date.now(),
@@ -308,7 +308,7 @@ export const updatePrivacyPreferences = mutation({
     // Log the privacy preference update
     await ctx.db.insert("auditLogs", {
       userId: session.userId,
-      fileId: session.userId as any,
+      // No fileId for privacy preference updates
       action: "update",
       success: true,
       timestamp: Date.now(),
@@ -384,7 +384,7 @@ export const acceptPrivacyPolicy = mutation({
     // Log policy acceptance
     await ctx.db.insert("auditLogs", {
       userId: session.userId,
-      fileId: session.userId as any,
+      // No fileId for privacy policy acceptance
       action: "update",
       success: true,
       timestamp: Date.now(),
