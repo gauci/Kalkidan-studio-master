@@ -7,12 +7,12 @@ import { Files, User, Download, LogOut, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
-import { UserProfileCard } from '@/components/dashboard/user-profile-card';
+// import { useToast } from '@/hooks/use-toast';
+// import { UserProfileCard } from '@/components/dashboard/user-profile-card';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -22,27 +22,15 @@ export default function DashboardPage() {
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
-    if (!logout) {
-      toast({
-        title: "Error",
-        description: "Logout service is not available. Please refresh the page.",
-        variant: "destructive",
-      });
-      return;
-    }
     try {
-      await logout();
-      toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out.",
-      });
+      if (logout) {
+        await logout();
+      }
       router.push('/');
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Logout error:', error);
+      // Force redirect even if logout fails
+      router.push('/');
     }
   };
 
