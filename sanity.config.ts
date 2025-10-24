@@ -1,10 +1,8 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
-import { dashboardTool } from '@sanity/dashboard'
 import { schemaTypes } from './sanity/schemas'
 import { structure } from './sanity/structure'
-import { Dashboard } from './sanity/components/Dashboard'
 
 export default defineConfig({
   name: 'kalkidan-cms',
@@ -14,9 +12,6 @@ export default defineConfig({
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
 
   plugins: [
-    dashboardTool({
-      widgets: [Dashboard()],
-    }),
     structureTool({
       structure,
     }),
