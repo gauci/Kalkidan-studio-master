@@ -269,7 +269,8 @@ export default function AdminLayout({
   if (adminState.error || authError) {
     return (
       <AuthErrorFallback 
-        message={adminState.error || authError || "Authentication error"}
+        error={adminState.error || authError}
+        message="Authentication error"
         onRetry={() => window.location.reload()}
       />
     );

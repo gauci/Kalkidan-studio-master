@@ -137,8 +137,22 @@ export function AuthLoadingFallback({ message }: { message?: string }) {
   return <AuthFallback type="loading" message={message} />;
 }
 
-export function AuthErrorFallback({ message, onRetry }: { message?: string; onRetry?: () => void }) {
-  return <AuthFallback type="error" message={message} onRetry={onRetry} showRetry />;
+export function AuthErrorFallback({ 
+  message, 
+  error, 
+  onRetry 
+}: { 
+  message?: string; 
+  error?: any; 
+  onRetry?: () => void 
+}) {
+  // Safely extract error message from various error types
+  const errorMessage = message || 
+    (typeof error === 'string' ? error : 
+     error?.message || 
+     'An unknown authentication error occurred.');
+  
+  return <AuthFallback type="error" message={errorMessage} onRetry={onRetry} showRetry />;
 }
 
 export function UnauthorizedFallback({ message }: { message?: string }) {
