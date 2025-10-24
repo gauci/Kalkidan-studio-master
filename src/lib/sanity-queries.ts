@@ -13,7 +13,16 @@ export const ARTICLE_QUERY = `*[_type == "article" && isPublished == true] | ord
   slug,
   excerpt,
   content,
-  featuredImage,
+  featuredImage{
+    asset->{
+      _id,
+      url,
+      metadata {
+        dimensions
+      }
+    },
+    alt
+  },
   categories[]->{
     title,
     slug
@@ -28,7 +37,16 @@ export const ARTICLE_BY_SLUG_QUERY = `*[_type == "article" && slug.current == $s
   slug,
   excerpt,
   content,
-  featuredImage,
+  featuredImage{
+    asset->{
+      _id,
+      url,
+      metadata {
+        dimensions
+      }
+    },
+    alt
+  },
   categories[]->{
     title,
     slug
@@ -43,6 +61,16 @@ export const ANNOUNCEMENT_QUERY = `*[_type == "announcement" && isPublished == t
   slug,
   summary,
   content,
+  bannerImage{
+    asset->{
+      _id,
+      url,
+      metadata {
+        dimensions
+      }
+    },
+    alt
+  },
   priority,
   targetAudience,
   attachments,
@@ -58,6 +86,16 @@ export const ANNOUNCEMENT_BY_SLUG_QUERY = `*[_type == "announcement" && slug.cur
   slug,
   summary,
   content,
+  bannerImage{
+    asset->{
+      _id,
+      url,
+      metadata {
+        dimensions
+      }
+    },
+    alt
+  },
   priority,
   targetAudience,
   attachments,

@@ -30,6 +30,23 @@ export const announcement = defineType({
       description: 'Brief summary shown in announcement lists',
     }),
     defineField({
+      name: 'bannerImage',
+      title: 'Banner Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+      fields: [
+        {
+          name: 'alt',
+          type: 'string',
+          title: 'Alternative text',
+          description: 'Important for SEO and accessibility.',
+        },
+      ],
+      description: 'Optional banner image displayed with the announcement',
+    }),
+    defineField({
       name: 'content',
       title: 'Content',
       type: 'array',

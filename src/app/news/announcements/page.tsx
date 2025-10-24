@@ -1,10 +1,12 @@
 import { getAnnouncements } from '@/lib/sanity-queries'
+import { getImageUrl } from '@/lib/sanity-image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CalendarIcon, SearchIcon, ArrowLeftIcon, AlertTriangleIcon, UsersIcon } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const metadata = {
   title: 'Announcements - Kalkidan',
@@ -111,7 +113,17 @@ function AnnouncementCard({ announcement }: { announcement: any }) {
 
   return (
     <Link href={`/news/announcements/${announcement.slug.current}`}>
-      <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+      <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
+        {announcement.bannerImage && (
+          <div className="relative w-full h-48">
+            <Image
+              src={getImageUrl(announcement.bannerImage, 400, 200) || ''}
+              alt={announcement.bannerImage.alt || announcement.title}
+              fill
+              className="object-cover"
+            />
+          </div>
+        )}
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2 mb-2">
             <CardTitle className="text-lg line-clamp-2">

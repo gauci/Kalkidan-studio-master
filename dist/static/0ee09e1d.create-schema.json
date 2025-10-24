@@ -278,6 +278,22 @@
         "type": "text"
       },
       {
+        "options": {
+          "hotspot": true
+        },
+        "description": "Optional banner image displayed with the announcement",
+        "fields": [
+          {
+            "description": "Important for SEO and accessibility.",
+            "name": "alt",
+            "type": "string",
+            "title": "Alternative text"
+          }
+        ],
+        "name": "bannerImage",
+        "type": "image"
+      },
+      {
         "of": [
           {
             "marks": {

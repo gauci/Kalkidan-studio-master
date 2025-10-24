@@ -40,6 +40,10 @@ export default async function DebugAnnouncementsPage() {
               <p className="text-sm text-gray-600">Summary: {announcement.summary}</p>
               <p className="text-sm text-gray-600">Priority: {announcement.priority}</p>
               <p className="text-sm text-gray-600">Published At: {announcement.publishedAt}</p>
+              <p className="text-sm text-gray-600">Banner Image: {announcement.bannerImage ? 'Yes' : 'No'}</p>
+              {announcement.bannerImage && (
+                <p className="text-sm text-gray-600">Image URL: {announcement.bannerImage.asset?.url}</p>
+              )}
             </div>
           ))}
         </div>
