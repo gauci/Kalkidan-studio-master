@@ -53,15 +53,5 @@ export default defineConfig({
     },
   },
 
-  // Custom studio branding
-  studio: {
-    components: {
-      logo: () => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 20 }}>🏛️</span>
-          <span style={{ fontWeight: 600 }}>Kalkidan CMS</span>
-        </div>
-      ),
-    },
-  },
+
 })
