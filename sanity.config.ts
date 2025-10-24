@@ -8,8 +8,8 @@ export default defineConfig({
   name: 'kalkidan-cms',
   title: 'Kalkidan CMS',
   
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+  projectId: 'w0wnv9ta',
+  dataset: 'production',
 
   plugins: [
     structureTool({
@@ -31,21 +31,7 @@ export default defineConfig({
       return prev
     },
     
-    // Custom actions
-    actions: (prev, { schemaType }) => {
-      // Add custom actions for content types that support publishing
-      if (['article', 'announcement', 'event', 'page'].includes(schemaType)) {
-        return [
-          // Keep default actions but filter out the default publish
-          ...prev.filter(action => action.name !== 'publish'),
-          // Add our custom actions
-          'PublishAction',
-          'UnpublishAction', 
-          'SchedulePublishAction',
-        ]
-      }
-      return prev
-    },
+
   },
 
 

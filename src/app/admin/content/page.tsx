@@ -155,7 +155,7 @@ export default function AdminContentPage() {
             Refresh
           </Button>
           <Button asChild>
-            <Link href="https://kalkidan-cms.sanity.studio" target="_blank">
+            <Link href="https://kalkidan.sanity.studio" target="_blank">
               <ExternalLinkIcon className="h-4 w-4 mr-2" />
               Open Sanity Studio
             </Link>
@@ -275,25 +275,25 @@ export default function AdminContentPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="https://kalkidan-cms.sanity.studio/structure/article" target="_blank">
+              <Link href="https://kalkidan.sanity.studio/structure/article" target="_blank">
                 <FileTextIcon className="h-6 w-6 mb-2" />
                 New Article
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="https://kalkidan-cms.sanity.studio/structure/announcement" target="_blank">
+              <Link href="https://kalkidan.sanity.studio/structure/announcement" target="_blank">
                 <MegaphoneIcon className="h-6 w-6 mb-2" />
                 New Announcement
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="https://kalkidan-cms.sanity.studio/structure/event" target="_blank">
+              <Link href="https://kalkidan.sanity.studio/structure/event" target="_blank">
                 <CalendarIcon className="h-6 w-6 mb-2" />
                 New Event
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="https://kalkidan-cms.sanity.studio/structure/page" target="_blank">
+              <Link href="https://kalkidan.sanity.studio/structure/page" target="_blank">
                 <FileIcon className="h-6 w-6 mb-2" />
                 New Page
               </Link>
