@@ -220,7 +220,7 @@ export default function AdminLayout({
     };
 
     verifyAdminAccess();
-  }, [user, token, isLoading, verifyRole, authError, router, toast]);
+  }, [user?.id, token, isLoading, authError]);
 
   const handleLogout = async (reason?: string) => {
     try {
@@ -293,7 +293,6 @@ export default function AdminLayout({
   // All security checks passed - safe to render admin interface
   return (
     <AuthErrorBoundary>
-      <ProtectedRoute requiredRole="admin" strictMode={true}>
         <SidebarProvider>
           <Sidebar>
             <SidebarHeader>
@@ -361,7 +360,6 @@ export default function AdminLayout({
             <main className="flex-1 p-4 sm:px-6 sm:py-0">{children}</main>
           </SidebarInset>
         </SidebarProvider>
-      </ProtectedRoute>
     </AuthErrorBoundary>
   );
 }
