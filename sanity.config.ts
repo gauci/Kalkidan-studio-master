@@ -30,9 +30,17 @@ export default defineConfig({
       }
       return prev
     },
-    
-
   },
 
+  // API configuration to fix connection issues
+  api: {
+    projectId: 'w0wnv9ta',
+    dataset: 'production',
+  },
+
+  // CORS and connection settings
+  cors: {
+    credentials: true,
+  },
 
 })

@@ -499,9 +499,20 @@
       },
       {
         "initialValue": false,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Toggle this ON to make the announcement visible on the website. Ensure title, slug, summary, and target audience are filled.",
         "name": "isPublished",
         "type": "boolean",
-        "title": "Published"
+        "title": "🚀 Published (Required to show on website)"
       },
       {
         "initialValue": false,

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "createdAt": "2025-10-24T12:36:36.447Z",
+  "createdAt": "2025-10-24T13:19:01.288Z",
   "workspaces": [
     {
       "name": "kalkidan-cms",
@@ -12,7 +12,7 @@
       "mediaLibrary": {
         "enabled": false
       },
-      "schema": "c683f4a3.create-schema.json",
+      "schema": "fcdf944d.create-schema.json",
       "tools": "918180e5.create-tools.json"
     }
   ]

@@ -148,9 +148,20 @@ export const announcement = defineType({
     }),
     defineField({
       name: 'isPublished',
-      title: 'Published',
+      title: '🚀 Published (Required to show on website)',
       type: 'boolean',
       initialValue: false,
+      description: 'Toggle this ON to make the announcement visible on the website. Ensure title, slug, summary, and target audience are filled.',
+      validation: (Rule) => Rule.custom((isPublished, context) => {
+        if (isPublished) {
+          const { title, slug, summary, targetAudience } = context.document as any
+          if (!title) return 'Title is required before publishing'
+          if (!slug?.current) return 'Slug is required before publishing'
+          if (!summary) return 'Summary is required before publishing'
+          if (!targetAudience?.length) return 'Target audience is required before publishing'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'isPinned',
