@@ -145,8 +145,13 @@ export default function AdminLayout({
         return;
       }
 
+      // Skip verification if already verified for this user session
+      if (adminState.authVerified && adminState.roleVerified && user.id) {
+        return;
+      }
+
       try {
-        // Log admin access attempt
+        // Log admin access attempt (only on initial verification)
         console.info('Admin access attempt:', {
           userId: user.id,
           userRole: user.role,
@@ -168,7 +173,7 @@ export default function AdminLayout({
         });
 
         if (hasAdminRole) {
-          // Log successful admin access
+          // Log successful admin access (only on initial verification)
           console.info('Admin access granted:', {
             userId: user.id,
             timestamp: new Date().toISOString(),
@@ -215,7 +220,7 @@ export default function AdminLayout({
     };
 
     verifyAdminAccess();
-  }, [user, token, isLoading, verifyRole, authError, router, toast, pathname]);
+  }, [user, token, isLoading, verifyRole, authError, router, toast]);
 
   const handleLogout = async (reason?: string) => {
     try {
