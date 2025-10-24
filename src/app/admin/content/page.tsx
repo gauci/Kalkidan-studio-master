@@ -334,28 +334,28 @@ export default function AdminContentPage() {
           title="Articles"
           icon={FileTextIcon}
           stats={contentStats.articles}
-          createUrl="/studio/intent/create/template=article"
+          createUrl="https://kalkidan.sanity.studio/intent/create/template=article"
           viewUrl="/news/articles"
         />
         <StatCard
           title="Announcements"
           icon={MegaphoneIcon}
           stats={contentStats.announcements}
-          createUrl="/studio/intent/create/template=announcement"
+          createUrl="https://kalkidan.sanity.studio/intent/create/template=announcement"
           viewUrl="/news/announcements"
         />
         <StatCard
           title="Events"
           icon={CalendarIcon}
           stats={contentStats.events}
-          createUrl="/studio/intent/create/template=event"
+          createUrl="https://kalkidan.sanity.studio/intent/create/template=event"
           viewUrl="/events"
         />
         <StatCard
           title="Pages"
           icon={FileIcon}
           stats={contentStats.pages}
-          createUrl="/studio/intent/create/template=page"
+          createUrl="https://kalkidan.sanity.studio/intent/create/template=page"
           viewUrl="/"
         />
       </div>
@@ -438,25 +438,25 @@ export default function AdminContentPage() {
               title="New Article"
               description="Write a new article"
               icon={FileTextIcon}
-              href="/studio/intent/create/template=article"
+              href="https://kalkidan.sanity.studio/intent/create/template=article"
             />
             <QuickActionButton
               title="New Announcement"
               description="Create an announcement"
               icon={MegaphoneIcon}
-              href="/studio/intent/create/template=announcement"
+              href="https://kalkidan.sanity.studio/intent/create/template=announcement"
             />
             <QuickActionButton
               title="New Event"
               description="Schedule an event"
               icon={CalendarIcon}
-              href="/studio/intent/create/template=event"
+              href="https://kalkidan.sanity.studio/intent/create/template=event"
             />
             <QuickActionButton
               title="New Page"
               description="Create a new page"
               icon={FileIcon}
-              href="/studio/intent/create/template=page"
+              href="https://kalkidan.sanity.studio/intent/create/template=page"
             />
           </div>
         </CardContent>
@@ -553,7 +553,7 @@ function ContentItem({ item }: { item: any }) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Link href={`/studio/intent/edit/id=${item.id}`} target="_blank">
+            <Link href={`https://kalkidan.sanity.studio/intent/edit/id=${item.id}`} target="_blank">
               <Button variant="ghost" size="sm">
                 <EditIcon className="h-4 w-4" />
               </Button>
